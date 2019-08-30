@@ -1,0 +1,30 @@
+import * as Sequelize from 'sequelize'
+import { IBaseAttributes } from '../interface/IBaseAttibutes'
+import { IModels } from '../interface/IModels'
+import { IBaseModel } from 'src/interface/IBaseModel'
+
+export interface {{modelName}}Attributes extends IBaseAttributes {
+  id: string
+{{attributes}}
+}
+
+export type {{modelName}}Instance = Sequelize.Instance<{{modelName}}Attributes>
+
+export interface {{modelName}}Model extends Sequelize.Model<{{modelName}}Instance, {{modelName}}Attributes>, IBaseModel<{{modelName}}Instance> {
+}
+
+export default (sequelize: Sequelize.Sequelize, DataTypes: Sequelize.DataTypes): {{modelName}}Model => {
+  const {{modelName}} = sequelize.define<{{modelName}}Instance, {{modelName}}Attributes>('{{modelName}}', {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV1
+    },
+{{sequelizeAttributes}}
+  }) as {{modelName}}Model
+
+  {{modelName}}.associate = (models: IModels): void => {
+  }
+
+  return {{modelName}}
+}

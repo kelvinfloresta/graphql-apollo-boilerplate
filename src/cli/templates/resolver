@@ -1,0 +1,34 @@
+import { GraphQLResolveInfo } from 'graphql'
+import { IGraphqlContext } from 'src/interface/IGraphqlContext'
+import { {{modelName}}Instance } from 'src/model/{{modelName}}.model'
+import { getAttributes } from '../../ast'
+
+export const resolver = {
+  {{modelName}}: {
+  },
+
+  Query: {
+    {{modelName}}: (parent, args, { db }: IGraphqlContext, info: GraphQLResolveInfo) => {
+      return db.{{modelName}}.findByPk(args.id, { attributes: getAttributes(info, db.{{modelName}}) })
+    },
+
+    {{modelName}}s: (parent, args, { db }: IGraphqlContext, info: GraphQLResolveInfo) => {
+      const attributes = getAttributes(info, db.{{modelName}})
+      return db.{{modelName}}.findAll({ attributes }) // TODO Filter
+    }
+  },
+
+  Mutation: {
+    Save{{modelName}}: (parent, args, { db }: IGraphqlContext) => {
+      return db.{{modelName}}.create(args.input)
+    },
+
+    Delete{{modelName}}: (parent, { id }, { db }: IGraphqlContext) => {
+      return db.{{modelName}}.destroy({ where: { id } })
+    },
+
+    Update{{modelName}}: (parent, args, { db }: IGraphqlContext) => {
+      return db.{{modelName}}.update(args.input)
+    }
+  }
+}

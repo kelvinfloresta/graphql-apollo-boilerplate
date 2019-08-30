@@ -1,0 +1,25 @@
+export const type = `
+
+  type {{modelName}} {
+    id: ID!
+{{typeFields}}
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input {{modelName}}Input {
+{{inputFields}}
+  }
+
+`
+
+export const query = `
+  {{modelName}}(id: ID!): {{modelName}}
+  {{modelName}}s: [{{modelName}}!]!
+`
+
+export const mutation = `
+  Save{{modelName}}(input: {{modelName}}Input!): {{modelName}}
+  Update{{modelName}}(id:ID!, input: {{modelName}}Input!): {{modelName}}
+  Delete{{modelName}}(id: ID!): Boolean
+`
