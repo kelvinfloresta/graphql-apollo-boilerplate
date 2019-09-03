@@ -53,12 +53,12 @@ function getDataLoaderMethod ({ type, target, modelName }: associationOptions): 
 function updateDataLoaderInterface (associateOptions: associationOptions): void {
   const content = loadDataLoaderInterface()
   const newContent = replaceDataLoaderInterface(content, associateOptions)
-  const filePath = path.join(INTERFACE_DIR, 'IDataLoader.ts')
+  const filePath = path.join(INTERFACE_DIR, 'dataloader/DataLoader.interface')
   fs.writeFileSync(filePath, newContent, 'utf8')
 }
 
 function loadDataLoaderInterface (): string {
-  const filePath = path.join(INTERFACE_DIR, 'IDataLoader.ts')
+  const filePath = path.join(INTERFACE_DIR, 'dataloader/DataLoader.interface')
   const content = fs.readFileSync(filePath, 'utf8')
   return content
 }

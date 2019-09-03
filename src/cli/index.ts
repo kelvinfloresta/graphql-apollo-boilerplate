@@ -4,7 +4,7 @@ import fs = require('fs')
 import path = require('path')
 import inquirer = require('inquirer')
 
-export const SCHEMA_DIR = path.join(__dirname, '../graphql/schemas')
+export const SCHEMA_DIR = path.join(__dirname, '../graphql/schema')
 export const RESOLVER_DIR = path.join(__dirname, '../graphql/resolvers')
 export const MODEL_DIR = path.join(__dirname, '../model')
 export const INTERFACE_DIR = path.join(__dirname, '../interface')

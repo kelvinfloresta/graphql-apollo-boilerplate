@@ -1,7 +1,7 @@
 import promptConfirm from './confirm'
 import promptAddAttribute, { buildAttributes, buildSequelizeAttributes } from './add-attributes'
 import promptSchema, { createSchema, buildSchemaFields } from './add-schema'
-import { loadTemplate, MODEL_DIR, INTERFACE_DIR } from '.'
+import { loadTemplate, MODEL_DIR } from '.'
 import { createResolver } from './add-resolver'
 import { capitalize } from 'lodash'
 import inquirer = require('inquirer')
@@ -39,7 +39,7 @@ export default async function promptCreateModel (): Promise<void> {
   const confirm = await promptConfirm()
   if (confirm) {
     createModel(modelName, attributes, sequelizeAttributes)
-    updateImodels(modelName)
+    // updateImodels(modelName)
   }
   if (confirm && confirmResolver) {
     createResolver(modelName)
@@ -65,15 +65,15 @@ function log (modelName, answerAttributes, typeFields, inputFields): void {
   console.log('Input Fields:', inputFields.map(e => e.name as string))
 }
 
-function updateImodels (modelName): void {
-  const regex = /(?<=IModels extends Models \{)(.|\s)*?(?=\})/
-  const filePath = path.join(INTERFACE_DIR, 'IModels.ts')
-  const oldContent = fs.readFileSync(filePath, 'utf8')
-  const newProp = `readonly ${modelName}: ${modelName}Model`
-  const [oldProps] = oldContent.match(regex)
-  let newContent = oldContent.replace(regex, `${oldProps}  ${newProp}\n`)
+// function updateImodels (modelName): void {
+//   const regex = /(?<=IModels extends Models \{)(.|\s)*?(?=\})/
+//   const filePath = path.join(INTERFACE_DIR, 'IModels.ts')
+//   const oldContent = fs.readFileSync(filePath, 'utf8')
+//   const newProp = `readonly ${modelName}: ${modelName}Model`
+//   const [oldProps] = oldContent.match(regex)
+//   let newContent = oldContent.replace(regex, `${oldProps}  ${newProp}\n`)
 
-  const newImport = `import { ${modelName}Model } from 'src/model/${modelName}.model'\n`
-  newContent = newImport + newContent
-  fs.writeFileSync(filePath, newContent, 'utf8')
-}
+//   const newImport = `import { ${modelName}Model } from 'src/model/${modelName}.model'\n`
+//   newContent = newImport + newContent
+//   fs.writeFileSync(filePath, newContent, 'utf8')
+// }

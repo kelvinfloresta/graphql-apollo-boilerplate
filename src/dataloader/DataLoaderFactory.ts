@@ -1,5 +1,5 @@
 // import { makeBatch, makeBatchHasMany, makeBatchHasOne } from './BatchFactory'
-import { IDataLoaderFactory, IDataLoaderParam } from 'interfaces/dataloader/IDataLoader'
+import { IDataLoaderFactory, IDataLoaderParam } from 'interfaces/dataloader/DataLoader.interface'
 // import sequelize = require('sequelize')
 // import DataLoader = require('dataLoader')
 

@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo } from 'graphql'
-import { getAttributes } from '../ast'
+import { getAttributes } from '../../utils/Graphql.utils'
 import {{modelName}}Model from '../../model/{{modelName}}.model'
 import { GraphqlContext } from 'interfaces/graphql/GraphqlContext.interface'
 
