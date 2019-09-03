@@ -1,34 +1,34 @@
 import { GraphQLResolveInfo } from 'graphql'
-import { IGraphqlContext } from 'src/interface/IGraphqlContext'
-import { {{modelName}}Instance } from 'src/model/{{modelName}}.model'
-import { getAttributes } from '../../ast'
+import { getAttributes } from '../ast'
+import {{modelName}}Model from '../../model/{{modelName}}.model'
+import { GraphqlContext } from 'interfaces/graphql/GraphqlContext.interface'
 
 export const resolver = {
+
   {{modelName}}: {
   },
 
   Query: {
-    {{modelName}}: (parent, args, { db }: IGraphqlContext, info: GraphQLResolveInfo) => {
-      return db.{{modelName}}.findByPk(args.id, { attributes: getAttributes(info, db.{{modelName}}) })
+    {{modelName}}: async (parent, args, context: GraphqlContext, info: GraphQLResolveInfo) => {
+      return {{modelName}}Model.findByPk(args.id, { attributes: getAttributes(info, {{modelName}}Model) })
     },
-
-    {{modelName}}s: (parent, args, { db }: IGraphqlContext, info: GraphQLResolveInfo) => {
-      const attributes = getAttributes(info, db.{{modelName}})
-      return db.{{modelName}}.findAll({ attributes }) // TODO Filter
+    {{modelName}}s: async (parent, args, context: GraphqlContext, info: GraphQLResolveInfo) => {
+      const attributes = getAttributes(info, {{modelName}}Model)
+      return {{modelName}}Model.findAll({ attributes }) // TODO Filter
     }
   },
 
   Mutation: {
-    Save{{modelName}}: (parent, args, { db }: IGraphqlContext) => {
-      return db.{{modelName}}.create(args.input)
+    Save{{modelName}}: async (parent, args) => {
+      return {{modelName}}Model.create(args.input)
     },
 
-    Delete{{modelName}}: (parent, { id }, { db }: IGraphqlContext) => {
-      return db.{{modelName}}.destroy({ where: { id } })
+    Delete{{modelName}}: async (parent, { id }) => {
+      return {{modelName}}Model.destroy({ where: { id } })
     },
 
-    Update{{modelName}}: (parent, args, { db }: IGraphqlContext) => {
-      return db.{{modelName}}.update(args.input)
+    Update{{modelName}}: async (parent, { id, ...rest }) => {
+      return {{modelName}}Model.update(rest, { where: { id } })
     }
   }
 }

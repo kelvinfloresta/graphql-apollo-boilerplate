@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize'
-import { isProduction } from '../../utils'
-import environment from '../../config/environment'
+import { isProduction } from '../utils'
+import environment from './environment'
 
 const {
   DATABASE: {
@@ -13,7 +13,7 @@ const {
   }
 } = environment
 
-const sequelize = new Sequelize(DATABASE_NAME, USERNAME, PASSWORD, {
+const db = new Sequelize(DATABASE_NAME, USERNAME, PASSWORD, {
   port,
   host,
   dialect,
@@ -26,4 +26,4 @@ const sequelize = new Sequelize(DATABASE_NAME, USERNAME, PASSWORD, {
   }
 })
 
-export default sequelize
+export default db

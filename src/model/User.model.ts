@@ -1,11 +1,11 @@
-import { Model, UUIDV1, UUID, ENUM, STRING } from 'sequelize'
+import * as Sequelize from 'sequelize'
 import { Role } from 'interfaces/models/UserModel.interface'
-import sequelize from '../config/database/sequelize.database'
+import db from '../config/database'
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs'
 
 const RoleS: Role[] = ['ADMIN', 'USER']
 
-class UserModel extends Model {
+class UserModel extends Sequelize.Model {
   public id!: string
   public password!: string
   public role!: Role
@@ -22,26 +22,26 @@ class UserModel extends Model {
 UserModel.init({
   id: {
     primaryKey: true,
-    type: UUID,
-    defaultValue: UUIDV1
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1
   },
   role: {
     values: RoleS,
-    type: ENUM,
+    type: Sequelize.ENUM,
     allowNull: false,
     defaultValue: 'USER'
   },
   name: {
-    type: STRING,
+    type: Sequelize.STRING,
     allowNull: false
   },
   email: {
-    type: STRING,
+    type: Sequelize.STRING,
     unique: 'emailUnique',
     allowNull: false
   },
   password: {
-    type: STRING,
+    type: Sequelize.STRING,
     allowNull: false
   }
 }, {
@@ -62,7 +62,7 @@ UserModel.init({
     }
   },
   paranoid: true,
-  sequelize
+  sequelize: db
 })
 
 export default UserModel

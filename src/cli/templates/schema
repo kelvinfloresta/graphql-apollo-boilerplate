@@ -1,5 +1,6 @@
-export const type = `
+import { gql } from 'apollo-server'
 
+const {{modelName}}Schema = gql`
   type {{modelName}} {
     id: ID!
 {{typeFields}}
@@ -11,15 +12,16 @@ export const type = `
 {{inputFields}}
   }
 
+  extend type Query {
+    {{modelName}}(id: ID!): {{modelName}}
+    {{modelName}}s: [{{modelName}}!]!
+  }
+
+  extend type Mutation {
+    Save{{modelName}}(input: {{modelName}}Input!): {{modelName}}
+    Update{{modelName}}(id:ID!, input: {{modelName}}Input!): {{modelName}}
+    Delete{{modelName}}(id: ID!): Boolean
+  }
 `
 
-export const query = `
-  {{modelName}}(id: ID!): {{modelName}}
-  {{modelName}}s: [{{modelName}}!]!
-`
-
-export const mutation = `
-  Save{{modelName}}(input: {{modelName}}Input!): {{modelName}}
-  Update{{modelName}}(id:ID!, input: {{modelName}}Input!): {{modelName}}
-  Delete{{modelName}}(id: ID!): Boolean
-`
+export default {{modelName}}Schema

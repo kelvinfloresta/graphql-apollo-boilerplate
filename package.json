@@ -1,12 +1,26 @@
 {
-  "name": "onfire",
+  "name": "app_name",
   "version": "1.0.0",
   "private": true,
   "description": "",
   "main": "src/index.ts",
   "scripts": {
     "start": "cross-env NODE_ENV=development nodemon -e ts --exec ts-node src/index.ts",
+    "build": "cross-env NODE_ENV=production tsc",
+    "cli": "ts-node src/cli/index.ts",
+    "lint": "eslint --ext .ts --fix .",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "npm run lint",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "author": "Kelvin Floresta de Andrade",
   "license": "ISC",
