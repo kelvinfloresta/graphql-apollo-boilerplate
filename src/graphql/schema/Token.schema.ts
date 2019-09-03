@@ -1,8 +1,10 @@
 import { gql } from 'apollo-server'
 
 const TokenSchema = gql`
-  """Token fo application"""
+
+  """Token Schema of application"""
   type Token {
+    """Token of application"""
     token: String!
   }
 

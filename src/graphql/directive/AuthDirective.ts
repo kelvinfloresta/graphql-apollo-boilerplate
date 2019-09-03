@@ -1,7 +1,8 @@
 import { SchemaDirectiveVisitor } from 'graphql-tools'
 import { defaultFieldResolver } from 'graphql'
-import { IGraphqlContext } from 'src/interface/IGraphqlContext'
-import UserService from 'services/User.service'
+import UserService from '../../services/User.service'
+import { GraphqlContext } from 'interfaces/graphql/GraphqlContext.interface'
+import { NotAuthorized } from 'utils/Error.utils'
 
 export class AuthDirective extends SchemaDirectiveVisitor {
   public visitObject (type): void {
@@ -37,14 +38,14 @@ export class AuthDirective extends SchemaDirectiveVisitor {
           return resolve.apply(this, args)
         }
 
-        const context: IGraphqlContext = args[2]
+        const context: GraphqlContext = args[2]
         if (!context.authUser) {
-          throw new Error('not authorized')
+          throw new NotAuthorized('not authorized')
         }
 
-        const user = await UserService.getById(context.authUser.id)
+        const user = await UserService.findById(context.authUser.id)
         if (!user.hasRole(requiredRole)) {
-          throw new Error('not authorized')
+          throw new NotAuthorized('not authorized')
         }
 
         return resolve.apply(this, args)

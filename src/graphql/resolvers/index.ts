@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import { merge } from 'lodash'
 import Environment from '../../config/environment'
-import { importSafeEslint } from '../../utils/import.utils'
+import { importSafeEslint } from '../../utils/Import.utils'
 
 const resolvers = []
 

@@ -1,7 +1,7 @@
 import { GraphQLResolveInfo } from 'graphql'
-import { IGraphqlContext } from 'interfaces/graphql/IGraphqlContext'
 import { getAttributes } from '../ast'
 import UserModel from '../../model/User.model'
+import { GraphqlContext } from 'interfaces/graphql/GraphqlContext.interface'
 
 export const resolver = {
 
@@ -9,10 +9,10 @@ export const resolver = {
   },
 
   Query: {
-    User: async (parent, args, context: IGraphqlContext, info: GraphQLResolveInfo) => {
+    User: async (parent, args, context: GraphqlContext, info: GraphQLResolveInfo) => {
       return UserModel.findByPk(args.id, { attributes: getAttributes(info, UserModel) })
     },
-    Users: async (parent, args, context: IGraphqlContext, info: GraphQLResolveInfo) => {
+    Users: async (parent, args, context: GraphqlContext, info: GraphQLResolveInfo) => {
       const attributes = getAttributes(info, UserModel)
       return UserModel.findAll({ attributes }) // TODO Filter
     }

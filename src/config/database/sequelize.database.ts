@@ -1,22 +1,17 @@
-import { Sequelize, Dialect } from 'sequelize'
+import { Sequelize } from 'sequelize'
 import { isProduction } from '../../utils'
+import environment from '../../config/environment'
 
 const {
-  DATABASE_NAME,
-  USERNAME,
-  PASSWORD,
-  PORT: port,
-  HOST: host,
-  DIALECT: dialect
-} = {
-  // TODO: Move Environment
-  DATABASE_NAME: '',
-  USERNAME: 'root',
-  PASSWORD: 'root',
-  PORT: 3306,
-  HOST: 'localhost',
-  DIALECT: 'mysql' as Dialect
-}
+  DATABASE: {
+    DATABASE_NAME,
+    USERNAME,
+    PASSWORD,
+    PORT: port,
+    HOST: host,
+    DIALECT: dialect
+  }
+} = environment
 
 const sequelize = new Sequelize(DATABASE_NAME, USERNAME, PASSWORD, {
   port,

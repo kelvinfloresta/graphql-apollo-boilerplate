@@ -1,19 +1,12 @@
 import { ApolloServer } from 'apollo-server'
 import typeDefs from './graphql/schema'
-import DataLoaderFactory from './dataloader/DataLoaderFactory'
-import UserService from './services/User.service'
 import resolversMerged from './graphql/resolvers'
 import sequelize from './config/database/sequelize.database'
-import { displayStart } from './utils'
 import environment from './config/environment'
-const { ALTER_TABLE } = environment
+import { getContext } from './utils/Graphql.utils'
+import { displayStart } from './utils/Console.utils'
 
-async function getContext ({ req }): Promise<any> {
-  const token = req.headers.authorization || ''
-  const authUser = await UserService.findByToken(token)
-  const dataLoaders = DataLoaderFactory()
-  return { authUser, dataLoaders }
-}
+const { DATABASE: { ALTER_TABLE } } = environment
 
 const server = new ApolloServer({
   typeDefs,
@@ -21,9 +14,9 @@ const server = new ApolloServer({
   resolvers: resolversMerged
 })
 
-sequelize.sync({ alter: ALTER_TABLE }).then(() => {
-  server.listen()
-    .then(({ url }) => {
-      displayStart(url)
-    })
-})
+sequelize
+  .sync({ alter: ALTER_TABLE })
+  .then(async () => {
+    const { url } = await server.listen()
+    displayStart(url)
+  })

@@ -1,9 +1,10 @@
 import UserModel from '../model/User.model'
 import * as jwt from 'jsonwebtoken'
 import AuthUser from 'interfaces/AuthUser.interface'
+import environment from '../config/environment'
+import { NotAuthorized } from '../utils/Error.utils'
 
-// TODO: Move Environment
-const JWT_SECRET = 'teste'
+const { JWT_SECRET } = environment
 
 const UserService = {
   async login ({ email, password }) {
@@ -13,12 +14,12 @@ const UserService = {
     })
 
     if (!user) {
-      throw new Error('Wrong email or password')
+      throw new NotAuthorized('Wrong email or password')
     }
 
     const passwordEncrypted = user.get('password')
     if (!user.passwordMatch(passwordEncrypted, password)) {
-      throw new Error('Wrong email or password')
+      throw new NotAuthorized('Wrong email or password')
     }
 
     return user
