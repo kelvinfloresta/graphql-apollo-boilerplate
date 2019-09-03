@@ -40,7 +40,7 @@ export default async function promptAddAttribute (attributes = []): Promise<any>
 export function buildAttributes (answerAttributes = []): string {
   return answerAttributes.map(entry => {
     const type = getAttributeType(entry.type)
-    return `  ${entry.name}: ${type}`
+    return `  public ${entry.name}!: ${type}`
   }).join('\n')
 }
 
@@ -75,18 +75,18 @@ function getAttributeType (type: string): string {
 function getSequelizeAttributeType (type: string): string {
   switch (type.toLocaleLowerCase()) {
     case 'string':
-      return 'DataTypes.STRING'
+      return 'Sequelize.STRING'
 
     case 'float':
-      return 'DataTypes.FLOAT'
+      return 'Sequelize.FLOAT'
 
     case 'decimal':
-      return 'DataTypes.DECIMAL'
+      return 'Sequelize.DECIMAL'
 
     case 'int':
-      return 'DataTypes.INTEGER'
+      return 'Sequelize.INTEGER'
 
     case 'boolean':
-      return 'DataTypes.BOOLEAN'
+      return 'Sequelize.BOOLEAN'
   }
 }
