@@ -9,6 +9,7 @@ export const RESOLVER_DIR = path.join(__dirname, '../graphql/resolvers')
 export const MODEL_DIR = path.join(__dirname, '../model')
 export const INTERFACE_DIR = path.join(__dirname, '../interface')
 export const DATALOADER_DIR = path.join(__dirname, '../dataloader')
+export const INDENT = '  '
 const ROOT_TEMPLATE_DIR = path.join(__dirname, 'templates')
 
 export function loadTemplate (templateName, params: { [index: string]: string }): string {

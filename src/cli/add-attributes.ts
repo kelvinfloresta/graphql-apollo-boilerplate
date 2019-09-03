@@ -1,3 +1,4 @@
+import { INDENT } from '../cli'
 import inquirer = require('inquirer')
 
 const ATTRIBUTE_QUESTIONS = [
@@ -28,7 +29,7 @@ const ATTRIBUTE_QUESTIONS = [
   }
 ]
 
-export default async function promptAddAttribute (attributes = []): Promise<any> {
+export default async function promptAddAttribute (attributes: any[] = []): Promise<any> {
   const { continue: hasMore, ...answers } = await inquirer.prompt(ATTRIBUTE_QUESTIONS)
   attributes.push(answers)
   if (hasMore) {
@@ -37,19 +38,19 @@ export default async function promptAddAttribute (attributes = []): Promise<any>
   return attributes
 }
 
-export function buildAttributes (answerAttributes = []): string {
+export function buildAttributes (answerAttributes: any[] = []): string {
   return answerAttributes.map(entry => {
     const type = getAttributeType(entry.type)
-    return `  public ${entry.name}!: ${type}`
+    return `${INDENT}public ${entry.name}!: ${type}`
   }).join('\n')
 }
 
-export function buildSequelizeAttributes (answerAttributes = []): string {
+export function buildSequelizeAttributes (answerAttributes: any[] = []): string {
   return answerAttributes.map(props => {
-    return `    ${props.name}: {
-      type: ${getSequelizeAttributeType(props.type)},
-      allowNull: ${props.allowNull}
-    }`
+    return `${INDENT}${props.name}: {
+${INDENT}${INDENT}type: ${getSequelizeAttributeType(props.type)},
+${INDENT}${INDENT}allowNull: ${props.allowNull}
+${INDENT}}`
   }).join(',\n')
 }
 
@@ -70,6 +71,7 @@ function getAttributeType (type: string): string {
     case 'boolean':
       return 'boolean'
   }
+  throw Error('Invalid parameter')
 }
 
 function getSequelizeAttributeType (type: string): string {
@@ -89,4 +91,5 @@ function getSequelizeAttributeType (type: string): string {
     case 'boolean':
       return 'Sequelize.BOOLEAN'
   }
+  throw Error('Invalid parameter')
 }

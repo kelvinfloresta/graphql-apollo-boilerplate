@@ -3,7 +3,7 @@ import { merge } from 'lodash'
 import Environment from '../../config/environment'
 import { importSafeEslint } from '../../utils/Import.utils'
 
-const resolvers = []
+const resolvers: any[] = []
 
 const filter = Environment.TYPESCRIPT ? '.resolver.ts' : '.resolver.js'
 const filterLenght = filter.length * -1

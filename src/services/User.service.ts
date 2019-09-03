@@ -27,7 +27,7 @@ const UserService = {
   async findById (id: string) {
     return UserModel.findByPk(id)
   },
-  async findByToken (token: string): Promise<AuthUser> {
+  async findByToken (token: string): Promise<AuthUser | undefined> {
     if (!token) return
 
     const decoded = jwt.verify(token, JWT_SECRET)
