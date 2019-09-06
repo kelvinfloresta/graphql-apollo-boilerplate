@@ -1,6 +1,6 @@
 import UserModel from '../model/User.model'
 import * as jwt from 'jsonwebtoken'
-import AuthUser from 'interfaces/AuthUser.interface'
+import AuthUser from 'interface/AuthUser.interface'
 import environment from '../config/environment'
 import { NotAuthorized } from '../utils/Error.utils'
 

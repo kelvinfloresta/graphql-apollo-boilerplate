@@ -1,5 +1,5 @@
 import { importSafeEslint } from '../../utils/Import.utils'
-import { InitConfig } from 'interfaces/environment/Environment.interface'
+import { InitConfig } from 'interface/environment/Environment.interface'
 
 const ENV_NAME = process.env.NODE_ENV || 'development'
 const fileName = 'config.' + ENV_NAME

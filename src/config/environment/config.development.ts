@@ -1,9 +1,9 @@
-import { InitConfig } from 'interfaces/environment/Environment.interface'
+import { InitConfig } from 'interface/environment/Environment.interface'
 
 export const config: InitConfig = {
   SERVER_PORT: 4000,
   DATABASE: {
-    DATABASE_NAME: '',
+    DATABASE_NAME: 'onfire',
     USERNAME: 'root',
     PASSWORD: 'root',
     HOST: 'localhost',

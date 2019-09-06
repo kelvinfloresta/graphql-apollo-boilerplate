@@ -1,5 +1,5 @@
 import { Op, Model, HasOne, HasMany } from 'Sequelize'
-import { IDataLoaderParam } from 'interfaces/dataloader/DataLoader.interface'
+import { IDataLoaderParam } from 'interface/dataloader/DataLoader.interface'
 
 type generateBatch<T> = (params: IDataLoaderParam[]) => Promise<T>
 
