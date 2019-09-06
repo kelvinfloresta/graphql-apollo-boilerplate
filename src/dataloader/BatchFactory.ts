@@ -1,10 +1,9 @@
-import * as sequelize from 'sequelize'
-import { IDataLoaderParam } from '../interface/IDataLoader'
-const { Op } = sequelize
+import { Op, Model, HasOne, HasMany } from 'Sequelize'
+import { IDataLoaderParam } from 'interfaces/dataloader/DataLoader.interface'
 
 type generateBatch<T> = (params: IDataLoaderParam[]) => Promise<T>
 
-export function makeBatch<TInstance extends sequelize.Instance<any>> (model: sequelize.Model<any, any>): generateBatch<TInstance[]> {
+export function makeBatch<T> (model): generateBatch<T[]> {
   return async (params: IDataLoaderParam[]) => {
     const ids = params.map(param => param.key)
     const attributes = params[0].attributes
@@ -16,14 +15,14 @@ export function makeBatch<TInstance extends sequelize.Instance<any>> (model: seq
   }
 }
 
-export function makeBatchHasOne<TInstance extends sequelize.Instance<any>> (
-  association: sequelize.IncludeAssociation
-): generateBatch<TInstance[]> {
+export function makeBatchHasOne<T extends Model, Y extends Model> (
+  association: HasOne<T, Y>
+): generateBatch<any[]> {
   return async (params: IDataLoaderParam[]) => {
     const ids = params.map(param => param.key)
     const attributes = params[0].attributes
 
-    const isBelongsTo = association['associationType'].startsWith('Belongs') as Boolean
+    const isBelongsTo = association.associationType.startsWith('Belongs')
     const keyName = association.source.name + 'Id'
 
     if (isBelongsTo) {
@@ -42,26 +41,27 @@ export function makeBatchHasOne<TInstance extends sequelize.Instance<any>> (
   }
 }
 
-export function makeBatchHasMany<TInstance extends sequelize.Instance<any>> (
-  association: sequelize.IncludeAssociation
-): generateBatch<TInstance[][][]> {
-  return async (params: IDataLoaderParam[]): Promise<TInstance[][][]> => {
+export function makeBatchHasMany<T extends Model = any, Y extends Model = any> (
+  association: HasMany<T, Y>
+): generateBatch<any[][][]> {
+  return async (params: IDataLoaderParam[]): Promise<any[][][]> => {
     const ids = params.map(param => param.key)
     const attributes = params[0].attributes
-    const isBelongsTo = association['associationType'].startsWith('Belongs') as Boolean
+
+    const isBelongsTo = association.associationType.startsWith('Belongs')
 
     const parent = isBelongsTo ? association.target : association.source
     const child = isBelongsTo ? association.source : association.target
 
-    const results = await parent.findAll({
+    const results = await parent.findAll<any>({
       attributes: ['id'],
       where: { id: { [Op.in]: ids } },
       include: [{ model: child, attributes }]
     })
 
     const relationName = isBelongsTo ? child.name + 's' : association['associationAccessor'] as string
-    results.sort((a, b) => ids.indexOf(a.get('id')) - ids.indexOf(b.get('id')))
-    const mapped = results.map(entry => [entry.get(relationName) as TInstance[]])
+    results.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
+    const mapped = results.map(entry => [entry.get(relationName) as any[]])
     return mapped
   }
 }
