@@ -1,8 +1,8 @@
 import { GraphQLResolveInfo } from 'graphql'
 import { get } from 'lodash'
 import { Model } from 'sequelize/types'
-import UserService from '../services/User.service'
-import { GraphqlContext } from 'interfaces/graphql/GraphqlContext.interface'
+import UserService from '../service/User.service'
+import { GraphqlContext } from 'interface/graphql/GraphqlContext.interface'
 import DataLoaderFactory from '../dataloader/DataLoaderFactory'
 
 export async function getContext ({ req }): Promise<GraphqlContext> {

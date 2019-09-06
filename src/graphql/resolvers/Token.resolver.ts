@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken'
-import UserService from '../../services/User.service'
+import UserService from '../../service/User.service'
 import environment from '../../config/environment'
 const { JWT_SECRET } = environment
 
