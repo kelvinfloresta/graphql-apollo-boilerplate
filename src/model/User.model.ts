@@ -1,11 +1,11 @@
 import * as Sequelize from 'sequelize'
-import { Role } from 'interfaces/models/UserModel.interface'
+import { Role } from 'interface/models/UserModel.interface'
 import db from '../config/database'
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs'
 
 const RoleS: Role[] = ['ADMIN', 'USER']
 
-class UserModel extends Sequelize.Model {
+class User extends Sequelize.Model {
   public id!: string
   public password!: string
   public role!: Role
@@ -19,7 +19,7 @@ class UserModel extends Sequelize.Model {
   }
 }
 
-UserModel.init({
+User.init({
   id: {
     primaryKey: true,
     type: Sequelize.UUID,
@@ -65,4 +65,4 @@ UserModel.init({
   sequelize: db
 })
 
-export default UserModel
+export default User
