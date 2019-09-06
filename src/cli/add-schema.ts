@@ -28,7 +28,7 @@ export function buildSchemaFields (answerTypeFields): string {
     }).join('\n')
 }
 
-function getSchemaType (type: string): string {
+function getSchemaType (type: string): string | undefined {
   switch (type.toLowerCase()) {
     case 'string':
       return 'String'
