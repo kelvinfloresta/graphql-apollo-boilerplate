@@ -1,12 +1,12 @@
 import * as Sequelize from 'sequelize'
 import db from '../config/database'
 
-class {{modelName}}Model extends Sequelize.Model {
+class {{modelName}} extends Sequelize.Model {
   public id!: string
 {{attributes}}
 }
 
-{{modelName}}Model.init({
+{{modelName}}.init({
   id: {
     primaryKey: true,
     type: Sequelize.UUID,
@@ -18,4 +18,4 @@ class {{modelName}}Model extends Sequelize.Model {
   sequelize: db
 })
 
-export default {{modelName}}Model
+export default {{modelName}}
