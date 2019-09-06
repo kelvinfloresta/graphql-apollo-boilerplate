@@ -15,7 +15,7 @@ export async function getContext ({ req }): Promise<GraphqlContext> {
 export function getAttributes (info: GraphQLResolveInfo, model: typeof Model): string[] {
   const fields: string[] = []
 
-  const node = get(info, 'info.fieldNodes[0].selectionSet.selections', [])
+  const node = get(info, 'fieldNodes[0].selectionSet.selections', [])
   node.forEach(el => {
     const isNode = el['selectionSet'] !== undefined
     const fieldName = el['name']['value'] as string
