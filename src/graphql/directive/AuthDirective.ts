@@ -1,7 +1,7 @@
 import { SchemaDirectiveVisitor } from 'graphql-tools'
 import { defaultFieldResolver } from 'graphql'
-import UserService from '../../services/User.service'
-import { GraphqlContext } from 'interfaces/graphql/GraphqlContext.interface'
+import UserService from '../../service/User.service'
+import { GraphqlContext } from 'interface/graphql/GraphqlContext.interface'
 import { NotAuthorized } from 'utils/Error.utils'
 
 export class AuthDirective extends SchemaDirectiveVisitor {
@@ -18,7 +18,8 @@ export class AuthDirective extends SchemaDirectiveVisitor {
     field._requiredAuthRole = this.args.requires
   }
 
-  public ensureFieldsWrapped (objectType): () => any {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public ensureFieldsWrapped (objectType) {
     // Mark the GraphQLObjectType object to avoid re-wrapping:
     if (objectType._authFieldsWrapped) return
     objectType._authFieldsWrapped = true
@@ -44,7 +45,7 @@ export class AuthDirective extends SchemaDirectiveVisitor {
         }
 
         const user = await UserService.findById(context.authUser.id)
-        if (!user.hasRole(requiredRole)) {
+        if (!user || !user.hasRole(requiredRole)) {
           throw new NotAuthorized('not authorized')
         }
 
