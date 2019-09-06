@@ -9,25 +9,25 @@ export const resolver = {
   },
 
   Query: {
-    User: async (parent, args, context: GraphqlContext, info: GraphQLResolveInfo) => {
+    User: async (_parent: any, args: { id: string }, _context: GraphqlContext, info: GraphQLResolveInfo) => {
       return UserModel.findByPk(args.id, { attributes: getAttributes(info, UserModel) })
     },
-    Users: async (parent, args, context: GraphqlContext, info: GraphQLResolveInfo) => {
+    Users: async (_parent: any, _args: any, _context: GraphqlContext, info: GraphQLResolveInfo) => {
       const attributes = getAttributes(info, UserModel)
       return UserModel.findAll({ attributes }) // TODO Filter
     }
   },
 
   Mutation: {
-    SaveUser: async (parent, args) => {
+    SaveUser: async (_parent: any, args: { input: any }) => {
       return UserModel.create(args.input)
     },
 
-    DeleteUser: async (parent, { id }) => {
+    DeleteUser: async (_parent: any, { id }: any) => {
       return UserModel.destroy({ where: { id } })
     },
 
-    UpdateUser: async (parent, { id, ...rest }) => {
+    UpdateUser: async (_parent: any, { id, ...rest }: any) => {
       return UserModel.update(rest, { where: { id } })
     }
   }
