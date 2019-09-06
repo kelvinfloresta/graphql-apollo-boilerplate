@@ -6,7 +6,7 @@ export const config: InitConfig = {
     DATABASE_NAME: '',
     USERNAME: 'root',
     PASSWORD: 'root',
-    HOST: '',
+    HOST: 'localhost',
     PORT: 3306,
     DIALECT: 'mysql',
     ALTER_TABLE: false,
