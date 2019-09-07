@@ -18,7 +18,7 @@ export default async function promptAddAssociation (): Promise<void> {
   const { modelName } = await inquirer.prompt(QUESTIONS)
   const { target, type, allowNull, schema } = await promptAssociateTo(modelName)
   const associationOptions: associationOptions = { modelName, target, type, allowNull, schema }
-  addAssociation(associationOptions)
+  // addAssociation(associationOptions)
   addSchemaAssociation(associationOptions)
   addDataloader(associationOptions)
   const confirmResolver = await promptConfirm('Want add resolver?')
@@ -59,55 +59,40 @@ async function promptAssociateTo (modelName): Promise<any> {
   return answer
 }
 
-function addAssociation (associate: associationOptions): void {
-  const oldModelContent = loadModel(associate.modelName)
-  const newModelContent = buildNewModelAssociation(oldModelContent, associate)
-  const filePath = path.join(MODEL_DIR, associate.modelName + '.model.ts')
-  fs.writeFileSync(filePath, newModelContent, 'utf8')
-}
+// function addAssociation (associate: associationOptions): void {
+//   const oldModelContent = loadModel(associate.modelName)
+//   const newModelContent = buildNewModelAssociation(oldModelContent, associate)
+//   const filePath = path.join(MODEL_DIR, associate.modelName + '.model.ts')
+//   fs.writeFileSync(filePath, newModelContent, 'utf8')
+// }
 
-function replaceAssociations (oldContent, { modelName, target, type }): string {
-  const regex = /(?<=\.associate = \(models: IModels\): void => \{)(.|\s)*?(?= {2}\})/
-  const [oldAssociationContent] = oldContent.match(regex)
-  const newAssociationContent = `${oldAssociationContent}    ${modelName}.${target} = ${modelName}.${type}(models.${target})\n`
-  return oldContent.replace(regex, newAssociationContent)
-}
-
-function loadModel (modelName: string): string {
-  const filePath = path.join(MODEL_DIR, modelName + '.model.ts')
-  const content = fs.readFileSync(filePath, 'utf8')
-  return content
-}
+// function loadModel (modelName: string): string {
+//   const filePath = path.join(MODEL_DIR, modelName + '.model.ts')
+//   const content = fs.readFileSync(filePath, 'utf8')
+//   return content
+// }
 
 function loadSchema (modelName: string): string {
   const filePath = path.join(SCHEMA_DIR, modelName + '.schema.ts')
   const content = fs.readFileSync(filePath, 'utf8')
   return content
 }
+// function replaceModelInterface (oldContent: string, associationOptions: associationOptions): string {
+//   const regexModelInterface = /(?<=Instance> \{)(.|\s)*?(?=\})/
+//   const [oldModelInterface] = oldContent.match(regexModelInterface) || ['Error']
+//   const newModelInterface = `${oldModelInterface}  ${associationOptions.target}: Sequelize.IncludeAssociation\n`
+//   return oldContent.replace(regexModelInterface, newModelInterface)
+// }
 
-function buildNewModelAssociation (oldModelContent: string, associationOptions): string {
-  const newAssociationContent = replaceAssociations(oldModelContent, associationOptions)
-  const newModelContent = replaceModelInterface(newAssociationContent, associationOptions)
-  const newAttributesContent = replaceAttributesInterface(newModelContent, associationOptions)
-  return newAttributesContent
-}
-
-function replaceModelInterface (oldContent: string, associationOptions: associationOptions): string {
-  const regexModelInterface = /(?<=Instance> \{)(.|\s)*?(?=\})/
-  const [oldModelInterface] = oldContent.match(regexModelInterface)
-  const newModelInterface = `${oldModelInterface}  ${associationOptions.target}: Sequelize.IncludeAssociation\n`
-  return oldContent.replace(regexModelInterface, newModelInterface)
-}
-
-function replaceAttributesInterface (oldContent: string, { target, type }: associationOptions): string {
-  if (type.toLocaleLowerCase() !== 'belongsto') {
-    return oldContent
-  }
-  const regexModelInterface = /(?<=IBaseAttributes \{)(.|\s)*?(?=\})/
-  const [oldModelInterface] = oldContent.match(regexModelInterface)
-  const newModelInterface = `${oldModelInterface}  ${target}Id?: string\n`
-  return oldContent.replace(regexModelInterface, newModelInterface)
-}
+// function replaceAttributesInterface (oldContent: string, { target, type }: associationOptions): string {
+//   if (type.toLocaleLowerCase() !== 'belongsto') {
+//     return oldContent
+//   }
+//   const regexModelInterface = /(?<=IBaseAttributes \{)(.|\s)*?(?=\})/
+//   const [oldModelInterface] = oldContent.match(regexModelInterface) || ['Error']
+//   const newModelInterface = `${oldModelInterface}  ${target}Id?: string\n`
+//   return oldContent.replace(regexModelInterface, newModelInterface)
+// }
 
 function loadAllModelsName (): string[] {
   return fs.readdirSync(MODEL_DIR, 'utf8')
@@ -178,7 +163,7 @@ function addAssociationResolver (associationOptions: associationOptions): void {
   fs.writeFileSync(filePath, newContent, 'utf8')
 }
 
-function loadResolver (modelName: string): string {
+function loadResolver (modelName: string): string | undefined {
   const filePath = path.join(RESOLVER_DIR, modelName + '.resolver.ts')
   if (fs.existsSync(filePath)) {
     const content = fs.readFileSync(filePath, 'utf8')
@@ -190,7 +175,7 @@ function loadResolver (modelName: string): string {
 function replaceResolverAssociation (oldContent: string, associationOptions: associationOptions): string {
   const { modelName, type, target } = associationOptions
   const regex = new RegExp(`(?<= {2}${modelName}: \\{)(.|\\s)*?(?=(\\S))`)
-  const match = oldContent.match(regex)
+  const match = oldContent.match(regex) || []
   const oldResolverContent = match[0]
   const isEmpty = match[2] === '}'
   const comma = isEmpty ? '' : ','

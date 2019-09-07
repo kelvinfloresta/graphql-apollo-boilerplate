@@ -5,7 +5,7 @@ import { INTERFACE_DIR, DATALOADER_DIR } from '.'
 
 export function addDataloader (associateOptions: associationOptions): void {
   if (associateOptions.schema.type) {
-    updateDataLoaderInterface(associateOptions)
+    // updateDataLoaderInterface(associateOptions)
     updateDataLoader(associateOptions)
   }
 }
@@ -27,7 +27,7 @@ function replaceDataLoader (oldContent: string, associateOptions: associationOpt
   const { modelName, target } = associateOptions
   const modelNameLowerCase = modelName.toLocaleLowerCase()
   const regex = /(?<= {2}return \{)(.|\s)*?(?= {2}\})/
-  const [oldDataloderContent] = oldContent.match(regex)
+  const [oldDataloderContent] = oldContent.match(regex) || ['Error']
   const dataLoaderMethod = getDataLoaderMethod(associateOptions)
   const loaderName = `${modelNameLowerCase}${target}Loader`
   const newDataLoader = `${loaderName}: ${dataLoaderMethod}`
@@ -35,7 +35,7 @@ function replaceDataLoader (oldContent: string, associateOptions: associationOpt
   return oldContent.replace(regex, newAssociationContent)
 }
 
-function getDataLoaderMethod ({ type, target, modelName }: associationOptions): string {
+function getDataLoaderMethod ({ type, target, modelName }: associationOptions): string | undefined {
   switch (type.toLocaleLowerCase()) {
     case 'belongsto':
       return `() => makeDataLoader(db.${target})`
@@ -50,28 +50,28 @@ function getDataLoaderMethod ({ type, target, modelName }: associationOptions): 
 // #endregion
 
 // #region DataLoaderInterface
-function updateDataLoaderInterface (associateOptions: associationOptions): void {
-  const content = loadDataLoaderInterface()
-  const newContent = replaceDataLoaderInterface(content, associateOptions)
-  const filePath = path.join(INTERFACE_DIR, 'dataloader/DataLoader.interface')
-  fs.writeFileSync(filePath, newContent, 'utf8')
-}
+// function updateDataLoaderInterface (associateOptions: associationOptions): void {
+//   const content = loadDataLoaderInterface()
+//   const newContent = replaceDataLoaderInterface(content, associateOptions)
+//   const filePath = path.join(INTERFACE_DIR, 'dataloader/DataLoader.interface')
+//   fs.writeFileSync(filePath, newContent, 'utf8')
+// }
 
-function loadDataLoaderInterface (): string {
-  const filePath = path.join(INTERFACE_DIR, 'dataloader/DataLoader.interface')
-  const content = fs.readFileSync(filePath, 'utf8')
-  return content
-}
+// function loadDataLoaderInterface (): string {
+//   const filePath = path.join(INTERFACE_DIR, 'dataloader/DataLoader.interface')
+//   const content = fs.readFileSync(filePath, 'utf8')
+//   return content
+// }
 
-function replaceDataLoaderInterface (oldContent, { modelName, target, type }: associationOptions): string {
-  const regex = /(?<=interface IDataLoaderFactory \{)(.|\s)*?(?=\})/
-  const [oldAssociationContent] = oldContent.match(regex)
-  const modelNameLowerCase = modelName.toLocaleLowerCase()
-  const loaderName = `${modelNameLowerCase}${target}Loader`
-  const isList = type.toLocaleLowerCase().includes('many')
-  const instance = isList ? `${target}Instance[][]` : `${target}Instance`
-  const newDataLoader = `${loaderName}: () => DataLoaderSafeNull<IDataLoaderParam, ${instance}>`
-  const newAssociationContent = `${oldAssociationContent}  ${newDataLoader}\n`
-  return oldContent.replace(regex, newAssociationContent)
-}
+// function replaceDataLoaderInterface (oldContent, { modelName, target, type }: associationOptions): string {
+//   const regex = /(?<=interface IDataLoaderFactory \{)(.|\s)*?(?=\})/
+//   const [oldAssociationContent] = oldContent.match(regex)
+//   const modelNameLowerCase = modelName.toLocaleLowerCase()
+//   const loaderName = `${modelNameLowerCase}${target}Loader`
+//   const isList = type.toLocaleLowerCase().includes('many')
+//   const instance = isList ? `${target}Instance[][]` : `${target}Instance`
+//   const newDataLoader = `${loaderName}: () => DataLoaderSafeNull<IDataLoaderParam, ${instance}>`
+//   const newAssociationContent = `${oldAssociationContent}  ${newDataLoader}\n`
+//   return oldContent.replace(regex, newAssociationContent)
+// }
 // #endregion

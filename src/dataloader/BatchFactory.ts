@@ -1,38 +1,40 @@
-import { Op, Model, HasOne, HasMany } from 'Sequelize'
+import { Op, Model, HasOne, HasMany, BelongsTo } from 'Sequelize'
 import { IDataLoaderParam } from 'interface/dataloader/DataLoader.interface'
+import { generateBatch } from 'interface/dataloader/Batch.interface'
 
-type generateBatch<T> = (params: IDataLoaderParam[]) => Promise<T>
+// function makeBatch<T> (model): generateBatch<T[]> {
+//   return async (params: IDataLoaderParam[]) => {
+//     const ids = params.map(param => param.key)
+//     const attributes = params[0].attributes
 
-export function makeBatch<T> (model): generateBatch<T[]> {
-  return async (params: IDataLoaderParam[]) => {
-    const ids = params.map(param => param.key)
-    const attributes = params[0].attributes
-
-    return model.findAll({
-      where: { id: { [Op.in]: ids } },
-      attributes
-    })
-  }
-}
-
+//     return model.findAll({
+//       where: { id: { [Op.in]: ids } },
+//       attributes
+//     })
+//   }
+// }
+// eslint-disable-next-line @typescript-eslint/promise-function-async
 export function makeBatchHasOne<T extends Model, Y extends Model> (
-  association: HasOne<T, Y>
-): generateBatch<any[]> {
+  association: HasOne<T, Y> | BelongsTo<T, Y>
+): any {
   return async (params: IDataLoaderParam[]) => {
     const ids = params.map(param => param.key)
     const attributes = params[0].attributes
 
     const isBelongsTo = association.associationType.startsWith('Belongs')
-    const keyName = association.source.name + 'Id'
 
     if (isBelongsTo) {
-      return association.source.findAll({
-        where: { [keyName]: { [Op.in]: ids } },
+      const belongsTo = association as BelongsTo<T, Y>
+      console.log(belongsTo.source.name)
+      const results = await belongsTo.source.findAll({
+        where: { id: { [Op.in]: ids } },
         attributes
       })
+      return results
     }
-
-    const results = await association.target.findAll({
+    const keyName = association.source.name + 'Id'
+    const hasOne = association as HasOne<T, Y>
+    const results = await hasOne.target.findAll({
       where: { [keyName]: { [Op.in]: ids } },
       attributes
     })
