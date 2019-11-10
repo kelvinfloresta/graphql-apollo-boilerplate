@@ -13,19 +13,15 @@ import { generateBatch } from 'interface/dataloader/Batch.interface'
 //     })
 //   }
 // }
-// eslint-disable-next-line @typescript-eslint/promise-function-async
+
 export function makeBatchHasOne<T extends Model, Y extends Model> (
   association: HasOne<T, Y> | BelongsTo<T, Y>
-): any {
-  return async (params: IDataLoaderParam[]) => {
-    const ids = params.map(param => param.key)
-    const attributes = params[0].attributes
-
+): (ids, attributes) => Promise<Model[]> {
+  return async (ids: string[], attributes: string[]) => {
     const isBelongsTo = association.associationType.startsWith('Belongs')
 
     if (isBelongsTo) {
       const belongsTo = association as BelongsTo<T, Y>
-      console.log(belongsTo.source.name)
       const results = await belongsTo.source.findAll({
         where: { id: { [Op.in]: ids } },
         attributes

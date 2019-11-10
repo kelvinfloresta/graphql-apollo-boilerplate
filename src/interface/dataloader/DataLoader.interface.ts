@@ -1,4 +1,5 @@
 export interface IDataLoaderFactory {
+  _?: string
 }
 
 export interface IDataLoaderParam {
