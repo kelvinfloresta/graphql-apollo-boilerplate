@@ -1,23 +1,27 @@
 import { Op, Model, HasOne, HasMany, BelongsTo } from 'Sequelize'
 import { IDataLoaderParam } from 'interface/dataloader/DataLoader.interface'
 import { generateBatch } from 'interface/dataloader/Batch.interface'
+export interface bachParams {
+  ids: string[]
+  attributes: string[]
+}
 
-// function makeBatch<T> (model): generateBatch<T[]> {
-//   return async (params: IDataLoaderParam[]) => {
-//     const ids = params.map(param => param.key)
-//     const attributes = params[0].attributes
+export function makeBatch<T> (model): generateBatch<T[]> {
+  return async (params: IDataLoaderParam[]) => {
+    const ids = params.map(param => param.key)
+    const attributes = params[0].attributes
 
-//     return model.findAll({
-//       where: { id: { [Op.in]: ids } },
-//       attributes
-//     })
-//   }
-// }
+    return model.findAll({
+      where: { id: { [Op.in]: ids } },
+      attributes
+    })
+  }
+}
 
 export function makeBatchHasOne<T extends Model, Y extends Model> (
   association: HasOne<T, Y> | BelongsTo<T, Y>
-): (ids, attributes) => Promise<Model[]> {
-  return async (ids: string[], attributes: string[]) => {
+): (params: bachParams) => Promise<Model[]> {
+  return async ({ ids, attributes }: bachParams) => {
     const isBelongsTo = association.associationType.startsWith('Belongs')
 
     if (isBelongsTo) {
@@ -28,6 +32,7 @@ export function makeBatchHasOne<T extends Model, Y extends Model> (
       })
       return results
     }
+
     const keyName = association.source.name + 'Id'
     const hasOne = association as HasOne<T, Y>
     const results = await hasOne.target.findAll({

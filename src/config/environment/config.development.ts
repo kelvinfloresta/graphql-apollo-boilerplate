@@ -3,7 +3,7 @@ import { InitConfig } from 'interface/environment/Environment.interface'
 export const config: InitConfig = {
   SERVER_PORT: 4000,
   DATABASE: {
-    DATABASE_NAME: '',
+    DATABASE_NAME: 'sistema-restaurante',
     USERNAME: 'root',
     PASSWORD: 'root',
     HOST: 'localhost',

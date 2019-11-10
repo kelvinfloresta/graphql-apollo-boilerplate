@@ -1,4 +1,4 @@
-import { makeBatchHasMany, makeBatchHasOne } from './BatchFactory'
+import { makeBatchHasMany, makeBatchHasOne, makeBatch } from './BatchFactory'
 import { IDataLoaderFactory, IDataLoaderParam } from 'interface/dataloader/DataLoader.interface'
 import { Model, HasOne, HasMany } from 'sequelize/types'
 import DataLoader = require('dataLoader')
@@ -10,7 +10,7 @@ export default function DataLoaderFactory (): IDataLoaderFactory {
   }
 }
 
-export class DataLoaderSafeNull<K, V> extends DataLoader<K, V> {
+export class DataLoaderSafeNull<k, V> extends DataLoader<k, V> {
   public async loadSafeNull (params): Promise<V | null> {
     const key = params.key
     if (key === null || key === undefined) {
@@ -22,9 +22,9 @@ export class DataLoaderSafeNull<K, V> extends DataLoader<K, V> {
 
 export function makeDataLoaderHasOne<T extends Model> (
   association: HasOne
-): DataLoaderSafeNull<IDataLoaderParam, T> {
-  const batchFn = makeBatchHasOne(association)
-  return new DataLoaderSafeNull<any, any>(batchFn, dataLoaderOptions)
+): DataLoaderSafeNull< any, any> {
+  const batchFn: any = makeBatchHasOne(association)
+  return new DataLoaderSafeNull(batchFn, dataLoaderOptions)
 }
 
 export function makeDataLoaderHasMany<T extends Model> (

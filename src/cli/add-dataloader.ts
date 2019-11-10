@@ -9,6 +9,7 @@ export function addDataloader (associateOptions: associationOptions): void {
     updateDataLoader(associateOptions)
   }
 }
+
 // #region DataLoader
 function updateDataLoader (associateOptions: associationOptions): void {
   const content = loadDataLoaderFactory()
