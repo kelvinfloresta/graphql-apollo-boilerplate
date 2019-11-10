@@ -18,4 +18,6 @@ class {{modelName}} extends Sequelize.Model {
   sequelize: db
 })
 
+// Relations
+
 export default {{modelName}}

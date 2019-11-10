@@ -1,11 +1,12 @@
 import { makeBatchHasMany, makeBatchHasOne, makeBatch } from './BatchFactory'
-import { IDataLoaderFactory, IDataLoaderParam } from 'interface/dataloader/DataLoader.interface'
+import { IDataLoaderParam } from 'interface/dataloader/DataLoader.interface'
 import { Model, HasOne, HasMany } from 'sequelize/types'
 import DataLoader = require('dataLoader')
 
 const dataLoaderOptions = { cacheKeyFn: (param: IDataLoaderParam) => param.key }
 
-export default function DataLoaderFactory (): IDataLoaderFactory {
+// eslint-disable-next-line @typescript-eslint/promise-function-async
+export default function DataLoaderFactory (): any {
   return {
   }
 }

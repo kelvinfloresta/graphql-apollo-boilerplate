@@ -65,4 +65,6 @@ User.init({
   sequelize: db
 })
 
+// Relations
+
 export default User

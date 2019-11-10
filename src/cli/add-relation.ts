@@ -1,5 +1,5 @@
 import promptConfirm from './confirm'
-import { MODEL_DIR, SCHEMA_DIR, RESOLVER_DIR } from '.'
+import { MODEL_DIR, SCHEMA_DIR, RESOLVER_DIR, INDENT } from '.'
 import { addDataloader } from './add-dataloader'
 import inquirer = require('inquirer')
 import fs = require('fs')
@@ -18,7 +18,7 @@ export default async function promptAddAssociation (): Promise<void> {
   const { modelName } = await inquirer.prompt(QUESTIONS)
   const { target, type, allowNull, schema } = await promptAssociateTo(modelName)
   const associationOptions: associationOptions = { modelName, target, type, allowNull, schema }
-  // addAssociation(associationOptions)
+  addAssociation(associationOptions)
   addSchemaAssociation(associationOptions)
   addDataloader(associationOptions)
   const confirmResolver = await promptConfirm('Want add resolver?')
@@ -59,24 +59,49 @@ async function promptAssociateTo (modelName): Promise<any> {
   return answer
 }
 
-// function addAssociation (associate: associationOptions): void {
-//   const oldModelContent = loadModel(associate.modelName)
-//   const newModelContent = buildNewModelAssociation(oldModelContent, associate)
-//   const filePath = path.join(MODEL_DIR, associate.modelName + '.model.ts')
-//   fs.writeFileSync(filePath, newModelContent, 'utf8')
-// }
+function addAssociation (associate: associationOptions): void {
+  const oldModelContent = loadModel(associate.modelName)
+  const newModelContent = addModelRelation(oldModelContent, associate)
+  replaceModelFile(associate.modelName, newModelContent)
+}
 
-// function loadModel (modelName: string): string {
-//   const filePath = path.join(MODEL_DIR, modelName + '.model.ts')
-//   const content = fs.readFileSync(filePath, 'utf8')
-//   return content
-// }
+function addModelRelation (fileContent: string, associationOptions: associationOptions): string {
+  const withImport = addImportModelToContent(associationOptions.target, fileContent)
+  const WithRelation = buildModelRelation(withImport, associationOptions)
+  return WithRelation
+}
+
+function buildModelRelation (fileContent: string, associationOptions: associationOptions): string {
+  const regex = new RegExp(`(?<=(// Relations))(.|\\s)*?(?=(export default))`)
+  const [oldContent] = fileContent.match(regex) || ['']
+  const { target, modelName, type } = associationOptions
+  const isSource = associationOptions.type.startsWith('has')
+  const keyName = isSource ? 'sourceKey' : 'targetKey'
+  const newContent = `${oldContent}${modelName}.${type}(${target}, {
+${INDENT}${keyName}: 'id'
+})
+
+`
+  return fileContent.replace(regex, newContent)
+}
+
+function replaceModelFile (modelName: string, newContent: string): void{
+  const filePath = path.join(MODEL_DIR, modelName + '.model.ts')
+  fs.writeFileSync(filePath, newContent, 'utf8')
+}
+
+function loadModel (modelName: string): string {
+  const filePath = path.join(MODEL_DIR, modelName + '.model.ts')
+  const content = fs.readFileSync(filePath, 'utf8')
+  return content
+}
 
 function loadSchema (modelName: string): string {
   const filePath = path.join(SCHEMA_DIR, modelName + '.schema.ts')
   const content = fs.readFileSync(filePath, 'utf8')
   return content
 }
+
 // function replaceModelInterface (oldContent: string, associationOptions: associationOptions): string {
 //   const regexModelInterface = /(?<=Instance> \{)(.|\s)*?(?=\})/
 //   const [oldModelInterface] = oldContent.match(regexModelInterface) || ['Error']
@@ -117,7 +142,7 @@ function replaceSchemaInputAssociation (content, associationOptions: association
   }
   const regex = new RegExp(`(?<=input ${modelName}Input \\{)(.|\\s)*?(?=\\})`)
   const [oldSchemaAssociation] = content.match(regex)
-  const targetType = getTargetType(associationOptions, true)
+  const targetType = getTargetSchemaType(associationOptions, true)
   const newAssociationContent = `${oldSchemaAssociation}  ${target}: ${targetType}\n    `
   return content.replace(regex, newAssociationContent)
 }
@@ -129,12 +154,12 @@ function replaceSchemaTypeAssociation (content, associationOptions: associationO
   }
   const regex = new RegExp(`(?<=type ${modelName} \\{)(.|\\s)*?(?=createdAt)`)
   const [oldSchemaAssociation] = content.match(regex)
-  const targetType = getTargetType(associationOptions)
-  const newAssociationContent = `${oldSchemaAssociation}${target}: ${targetType}\n    `
+  const targetType = getTargetSchemaType(associationOptions)
+  const newAssociationContent = `${oldSchemaAssociation}${target}: ${targetType}\n${INDENT}${INDENT}`
   return content.replace(regex, newAssociationContent)
 }
 
-function getTargetType ({ type, target, allowNull }: associationOptions, isInput = false): string {
+function getTargetSchemaType ({ type, target, allowNull }: associationOptions, isInput = false): string {
   const isList = type.toLowerCase().includes('many')
   const targetName = isInput ? 'ID' : target
   if (isList) {
@@ -179,13 +204,21 @@ function replaceResolverAssociation (oldContent: string, associationOptions: ass
   const oldResolverContent = match[0]
   const isEmpty = match[2] === '}'
   const comma = isEmpty ? '' : ','
-  const isList = type.toLowerCase().includes('many')
-  const associationResolver = isList ? buildResolerAssociationList(associationOptions) : buildResolerAssociation(associationOptions)
-  const newResolverContent = `\n    ${associationResolver}${comma}${oldResolverContent}`
+  const isMany = type.toLowerCase().includes('many')
+  const associationResolver = isMany ? buildResolerAssociationList(associationOptions) : buildResolerAssociation(associationOptions)
+  const newResolverContent = `\n${INDENT}${INDENT}${associationResolver}${comma}${oldResolverContent}`
   const newContent = oldContent.replace(regex, newResolverContent)
-  const alreadyImported = newContent.indexOf(`{ ${target}Instance }`) !== -1
-  const importInstance = !alreadyImported && isList ? `import { ${target}Instance } from 'src/model/${target}.model'\n` : ''
-  const newContentWithImport = importInstance + newContent
+  const newContentWithImport = addImportModelToContent(target, newContent)
+  return newContentWithImport
+}
+
+function addImportModelToContent (modelName: string, fileContent: string): string {
+  const importText = `import ${modelName} from 'model/${modelName}.model'`
+  const alreadyImported = fileContent.indexOf(importText) !== -1
+  if (alreadyImported) {
+    return fileContent
+  }
+  const newContentWithImport = importText + '\n' + fileContent
   return newContentWithImport
 }
 
@@ -194,9 +227,9 @@ function buildResolerAssociationList (associationOptions: associationOptions): s
   const targetLowerCase = target.toLowerCase()
   const loaderName = `${modelName.toLowerCase()}${target}Loader()`
 
-  return `${target}s: async (${targetLowerCase}: ${target}Instance, args, { db, dataLoaders }: IGraphqlContext, info: GraphQLResolveInfo) => {
-      const key = ${targetLowerCase}.get('id')
-      const attributes = getAttributes(info, db.${target})
+  return `${target}s: async (${targetLowerCase}: ${target}Instance, args, { db, dataLoaders }: GraphqlContext, info: GraphQLResolveInfo) => {
+      const key = ${targetLowerCase}.id
+      const attributes = getAttributes(info, ${target})
     
       const [result = []] = await dataLoaders.${loaderName}.loadSafeNull({ key, attributes })
       return result
@@ -209,9 +242,9 @@ function buildResolerAssociation (associationOptions: associationOptions): strin
   const loaderName = `${modelNameLowerCase}${target}Loader()`
   const parentKey = associationOptions.type.startsWith('has') ? 'id' : `${target}Id`
 
-  return `${target}: async (${modelNameLowerCase}: ${modelName}Instance, args, { db, dataLoaders }: IGraphqlContext, info: GraphQLResolveInfo) => {
-      const key = ${modelNameLowerCase}.get('${parentKey}')
-      const attributes = getAttributes(info, db.${target})
+  return `${target}: async (${modelNameLowerCase}: ${modelName}, args, { db, dataLoaders }: GraphqlContext, info: GraphQLResolveInfo) => {
+      const key = ${modelNameLowerCase}.${parentKey}
+      const attributes = getAttributes(info, ${target})
       return dataLoaders.${loaderName}.loadSafeNull({ key, attributes })
     }`
 }
