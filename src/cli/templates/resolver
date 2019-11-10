@@ -1,7 +1,7 @@
 import { GraphQLResolveInfo } from 'graphql'
 import { getAttributes } from '../../utils/Graphql.utils'
 import {{modelName}}Model from '../../model/{{modelName}}.model'
-import { GraphqlContext } from 'interfaces/graphql/GraphqlContext.interface'
+import { GraphqlContext } from 'interface/graphql/GraphqlContext.interface'
 
 export const resolver = {
 
@@ -27,8 +27,9 @@ export const resolver = {
       return {{modelName}}Model.destroy({ where: { id } })
     },
 
-    Update{{modelName}}: async (parent, { id, ...rest }) => {
-      return {{modelName}}Model.update(rest, { where: { id } })
+    Update{{modelName}}: async (parent, { id, input }, context: GraphqlContext, info: GraphQLResolveInfo) => {
+      await {{modelName}}.update(input, { where: { id } })
+      return {{modelName}}.findByPk(id, { attributes: getAttributes(info, {{modelName}}) })
     }
   }
 }
