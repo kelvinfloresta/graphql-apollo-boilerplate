@@ -7,7 +7,7 @@ import { NotAuthorized } from '../utils/Error.utils'
 const { JWT_SECRET } = environment
 
 const UserService = {
-  async login ({ email, password }) {
+  async login ({ email, password }: { email: string, password: string}) {
     const user = await UserModel.findOne({
       where: { email },
       attributes: ['id', 'password']

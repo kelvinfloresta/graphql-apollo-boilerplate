@@ -23,6 +23,16 @@ export function loadTemplate (templateName, params: { [index: string]: string })
   return content
 }
 
+export function importModelToContent (modelName: string, fileContent: string): string {
+  const importText = `import ${modelName} from 'model/${modelName}.model'`
+  const alreadyImported = fileContent.indexOf(importText) !== -1
+  if (alreadyImported) {
+    return fileContent
+  }
+  const newContentWithImport = importText + '\n' + fileContent
+  return newContentWithImport
+}
+
 const QUESTIONS = [
   {
     name: 'command',

@@ -6,9 +6,9 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "cross-env NODE_PATH=src NODE_ENV=development nodemon -e ts --exec ts-node src/main.ts",
-    "start:production": "cross-env NODE_ENV=production node dist/main.js",
+    "start:production": "cross-env NODE_PATH=src NODE_ENV=production node dist/main.js",
     "build": "cross-env NODE_ENV=production tsc",
-    "cli": "ts-node src/cli/index.ts",
+    "cli": "cross-env NODE_PATH=src ts-node src/cli/index.ts",
     "lint:ts": "eslint . --ext .ts",
     "lint:ts:fix": "npm run lint:ts -- --fix",
     "test": "echo \"Error: no test specified\" && exit 1"

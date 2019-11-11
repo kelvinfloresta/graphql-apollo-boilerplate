@@ -5,8 +5,8 @@ import DataLoader = require('dataLoader')
 
 const dataLoaderOptions = { cacheKeyFn: (param: IDataLoaderParam) => param.key }
 
-// eslint-disable-next-line @typescript-eslint/promise-function-async
-export default function DataLoaderFactory (): any {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export default function DataLoaderFactory () {
   return {
   }
 }
@@ -21,10 +21,11 @@ export class DataLoaderSafeNull<k, V> extends DataLoader<k, V> {
   }
 }
 
-export function makeDataLoaderHasOne<T extends Model> (
+export function makeDataLoaderHasOne (
   association: HasOne
-): DataLoaderSafeNull< any, any> {
-  const batchFn: any = makeBatchHasOne(association)
+): DataLoaderSafeNull<IDataLoaderParam, any> {
+  const batchGenerated = makeBatchHasOne(association)
+  const batchFn = async (params: IDataLoaderParam[]): Promise<any> => batchGenerated(params)
   return new DataLoaderSafeNull(batchFn, dataLoaderOptions)
 }
 
@@ -37,11 +38,11 @@ export function makeDataLoaderHasMany<T extends Model> (
   return new DataLoaderSafeNull<IDataLoaderParam, T[][]>(batchFn, dataLoaderOptions)
 }
 
-export function makeDataLoader<TInstance extends Model> (
-  model: Model<any, any>
-): DataLoaderSafeNull<IDataLoaderParam, TInstance> {
-  const batchGenerated = makeBatch<TInstance>(model)
-  const batchFn = async (params: IDataLoaderParam[]): Promise<TInstance[]> => batchGenerated(params)
+export function makeDataLoader<T extends Model> (
+  model: new () => T
+): DataLoaderSafeNull<IDataLoaderParam, T> {
+  const batchGenerated = makeBatch<T>(model)
+  const batchFn = async (params: IDataLoaderParam[]): Promise<T[]> => batchGenerated(params)
 
-  return new DataLoaderSafeNull<IDataLoaderParam, TInstance>(batchFn, dataLoaderOptions)
+  return new DataLoaderSafeNull<IDataLoaderParam, T>(batchFn, dataLoaderOptions)
 }

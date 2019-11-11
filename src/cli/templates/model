@@ -2,8 +2,15 @@ import * as Sequelize from 'sequelize'
 import db from '../config/database'
 
 class {{modelName}} extends Sequelize.Model {
-  public id!: string
+  public id: string
 {{attributes}}
+  public readonly createdAt: Date
+  public readonly updatedAt: Date
+
+  // foreignkeys
+
+  public static associations: {
+  }
 }
 
 {{modelName}}.init({

@@ -6,9 +6,9 @@ const ATTRIBUTE_QUESTIONS = [
     name: 'name',
     type: 'input',
     message: 'Attribute name:',
-    validate: function (input) {
+    validate: function (input: string) {
       if (/[a-z]/.test(input)) return true
-      else return 'Project name may only include letters'
+      return 'Project name may only include letters'
     }
   },
   {
@@ -41,7 +41,7 @@ export default async function promptAddAttribute (attributes: any[] = []): Promi
 export function buildAttributes (answerAttributes: any[] = []): string {
   return answerAttributes.map(entry => {
     const type = getAttributeType(entry.type)
-    return `${INDENT}public ${entry.name}!: ${type}`
+    return `${INDENT}public ${entry.name}: ${type}`
   }).join('\n')
 }
 
@@ -71,7 +71,8 @@ function getAttributeType (type: string): string {
     case 'boolean':
       return 'boolean'
   }
-  throw Error('Invalid parameter')
+
+  throw new Error('Invalid parameter')
 }
 
 function getSequelizeAttributeType (type: string): string {
@@ -91,5 +92,6 @@ function getSequelizeAttributeType (type: string): string {
     case 'boolean':
       return 'Sequelize.BOOLEAN'
   }
-  throw Error('Invalid parameter')
+
+  throw new Error('Invalid parameter')
 }

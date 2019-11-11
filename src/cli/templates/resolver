@@ -10,21 +10,21 @@ export const resolver = {
 
   Query: {
     {{modelName}}: async (parent, args, context: GraphqlContext, info: GraphQLResolveInfo) => {
-      return {{modelName}}Model.findByPk(args.id, { attributes: getAttributes(info, {{modelName}}Model) })
+      return {{modelName}}.findByPk(args.id, { attributes: getAttributes(info, {{modelName}}) })
     },
     {{modelName}}s: async (parent, args, context: GraphqlContext, info: GraphQLResolveInfo) => {
-      const attributes = getAttributes(info, {{modelName}}Model)
-      return {{modelName}}Model.findAll({ attributes }) // TODO Filter
+      const attributes = getAttributes(info, {{modelName}})
+      return {{modelName}}.findAll({ attributes }) // TODO Filter
     }
   },
 
   Mutation: {
     Save{{modelName}}: async (parent, args) => {
-      return {{modelName}}Model.create(args.input)
+      return {{modelName}}.create(args.input)
     },
 
     Delete{{modelName}}: async (parent, { id }) => {
-      return {{modelName}}Model.destroy({ where: { id } })
+      return {{modelName}}.destroy({ where: { id } })
     },
 
     Update{{modelName}}: async (parent, { id, input }, context: GraphqlContext, info: GraphQLResolveInfo) => {

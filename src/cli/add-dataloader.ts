@@ -1,7 +1,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import { associationOptions } from './add-relation'
-import { DATALOADER_DIR } from '.'
+import { DATALOADER_DIR, INDENT, importModelToContent } from '.'
 
 export function addDataloader (associateOptions: associationOptions): void {
   if (associateOptions.schema.type) {
@@ -13,7 +13,7 @@ export function addDataloader (associateOptions: associationOptions): void {
 // #region DataLoader
 function updateDataLoader (associateOptions: associationOptions): void {
   const content = loadDataLoaderFactory()
-  const newContent = replaceDataLoader(content, associateOptions)
+  const newContent = addLoaderFactory(content, associateOptions)
   const filePath = path.join(DATALOADER_DIR, 'DataLoaderFactory.ts')
   fs.writeFileSync(filePath, newContent, 'utf8')
 }
@@ -24,36 +24,47 @@ function loadDataLoaderFactory (): string {
   return content
 }
 
-function replaceDataLoader (oldContent: string, associateOptions: associationOptions): string {
-  const { modelName, target } = associateOptions
-  const modelNameLowerCase = modelName.toLocaleLowerCase()
-  const regex = /(?<= {2}return \{)(.|\s)*?(?= {2}\})/
-  const [oldDataloderContent] = oldContent.match(regex) || ['Error']
-  const dataLoaderMethod = getDataLoaderMethod(associateOptions)
-  const loaderName = `${modelNameLowerCase}${target}Loader`
-  const newDataLoader = `${loaderName}: ${dataLoaderMethod}`
-  const newAssociationContent = `\n    ${newDataLoader},${oldDataloderContent}`
-  return oldContent.replace(regex, newAssociationContent)
+function addLoaderFactory (fileContent: string, associateOptions: associationOptions): string {
+  const { type, target, modelName } = associateOptions
+  const isBelongsTo = type.toUpperCase() === 'belongsto'
+  const modelToBeImport = isBelongsTo ? target : modelName
+  const withDataLoader = buildLoaderMethod(fileContent, associateOptions)
+  const withImport = importModelToContent(modelToBeImport, withDataLoader)
+  return withImport
 }
 
-function getDataLoaderMethod ({ type, target, modelName }: associationOptions): string | undefined {
+function buildLoaderMethod (fileContent: string, associateOptions: associationOptions): string {
+  const { modelName, target } = associateOptions
+  const regex = /(?<= {2}return \{)(.|\s)*?(?= {2}\})/
+  const [oldDataloderContent] = fileContent.match(regex) || ['']
+  const dataLoaderMethod = buildLoaderFunction(associateOptions)
+  const modelNameLowerCase = modelName.toLocaleLowerCase()
+  const loaderName = `${modelNameLowerCase}${target}Loader`
+  const newDataLoader = `${loaderName}: ${dataLoaderMethod}`
+  const newAssociationContent = `\n${INDENT}${INDENT}${newDataLoader},${oldDataloderContent}`
+  return fileContent.replace(regex, newAssociationContent)
+}
+
+function buildLoaderFunction ({ type, target, modelName }: associationOptions): string | undefined {
   switch (type.toLocaleLowerCase()) {
     case 'belongsto':
-      return `() => makeDataLoader(db.${target})`
+      return `() => makeDataLoader(${target})`
 
     case 'hasone':
-      return `() => makeDataLoaderHasOne(db.${modelName}.${target})`
+      return `() => makeDataLoaderHasOne(${modelName}.associations.${target})`
 
     case 'hasmany':
-      return `() => makeDataLoaderHasMany(db.${modelName}.${target})`
+      return `() => makeDataLoaderHasMany(${modelName}.associations.${target}s)`
   }
+
+  throw new Error('Invalid parameter')
 }
 // #endregion
 
 // #region DataLoaderInterface
 // function updateDataLoaderInterface (associateOptions: associationOptions): void {
 //   const content = loadDataLoaderInterface()
-//   const newContent = replaceDataLoaderInterface(content, associateOptions)
+//   const newContent = addLoaderFactoryInterface(content, associateOptions)
 //   const filePath = path.join(INTERFACE_DIR, 'dataloader/DataLoader.interface')
 //   fs.writeFileSync(filePath, newContent, 'utf8')
 // }
@@ -64,7 +75,7 @@ function getDataLoaderMethod ({ type, target, modelName }: associationOptions): 
 //   return content
 // }
 
-// function replaceDataLoaderInterface (oldContent, { modelName, target, type }: associationOptions): string {
+// function addLoaderFactoryInterface (oldContent, { modelName, target, type }: associationOptions): string {
 //   const regex = /(?<=interface IDataLoaderFactory \{)(.|\s)*?(?=\})/
 //   const [oldAssociationContent] = oldContent.match(regex)
 //   const modelNameLowerCase = modelName.toLocaleLowerCase()

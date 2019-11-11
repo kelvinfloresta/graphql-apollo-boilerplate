@@ -20,8 +20,10 @@ export function makeBatch<T> (model): generateBatch<T[]> {
 
 export function makeBatchHasOne<T extends Model, Y extends Model> (
   association: HasOne<T, Y> | BelongsTo<T, Y>
-): (params: bachParams) => Promise<Model[]> {
-  return async ({ ids, attributes }: bachParams) => {
+): (params: IDataLoaderParam[]) => Promise<Model[]> {
+  return async (params: IDataLoaderParam[]): Promise<any> => {
+    const ids = params.map(el => el.key)
+    const attributes = params[0].attributes
     const isBelongsTo = association.associationType.startsWith('Belongs')
 
     if (isBelongsTo) {
