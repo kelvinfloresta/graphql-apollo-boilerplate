@@ -1,4 +1,4 @@
-import { InitConfig } from 'interfaces/environment/Environment.interface'
+import { InitConfig } from 'interface/environment/Environment.interface'
 
 export const config: InitConfig = {
   SERVER_PORT: 4000,
