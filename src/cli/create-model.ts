@@ -1,9 +1,10 @@
 import promptConfirm from './confirm'
 import promptAddAttribute, { buildAttributes, buildSequelizeAttributes } from './add-attributes'
 import promptSchema, { createSchema, buildSchemaFields } from './add-schema'
-import { loadTemplate, MODEL_DIR } from '.'
+import { MODEL_DIR } from '.'
 import { createResolver } from './add-resolver'
 import { capitalize } from 'lodash'
+import { loadTemplate } from './file.utils'
 import inquirer = require('inquirer')
 import fs = require('fs')
 import path = require('path')

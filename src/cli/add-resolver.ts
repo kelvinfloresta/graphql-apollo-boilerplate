@@ -1,4 +1,5 @@
-import { loadTemplate, RESOLVER_DIR } from '.'
+import { RESOLVER_DIR } from '.'
+import { loadTemplate } from './file.utils'
 import fs = require('fs')
 import path = require('path')
 

@@ -1,7 +1,8 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import { associationOptions } from './add-relation'
-import { DATALOADER_DIR, INDENT, importModelToContent } from '.'
+import { DATALOADER_DIR, INDENT } from '.'
+import { importModelToContent } from './file.utils'
 
 export function addDataloader (associateOptions: associationOptions): void {
   if (associateOptions.schema.type) {

@@ -1,5 +1,6 @@
 import promptSelectFields from './select-input-fields'
-import { loadTemplate, SCHEMA_DIR } from '.'
+import { SCHEMA_DIR } from '.'
+import { loadTemplate } from './file.utils'
 import fs = require('fs')
 import path = require('path')
 

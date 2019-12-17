@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo } from 'graphql'
-import { getAttributes } from '../../utils/Graphql.utils'
-import {{modelName}} from '../../model/{{modelName}}.model'
+import { getAttributes } from 'utils/Graphql.utils'
+import {{modelName}} from 'model/{{modelName}}.model'
 import { GraphqlContext } from 'interface/graphql/GraphqlContext.interface'
 
 export const resolver = {
