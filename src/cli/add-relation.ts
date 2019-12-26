@@ -4,6 +4,13 @@ import { loadModel, replaceModelFile, loadAllModelsName, importModelToContent } 
 import { addSchemaAssociation } from './add-relation-schema'
 import inquirer = require('inquirer')
 
+const associationType = {
+  belongsTo: 'belongsTo',
+  hasOne: 'hasOne',
+  hasMany: 'hasMany',
+  belongsToMany: 'belongsToMany'
+}
+
 export default async function promptAddAssociation (): Promise<void> {
   const QUESTIONS = [
     {
@@ -33,7 +40,12 @@ async function promptAssociateTo (modelName): Promise<any> {
       name: 'type',
       type: 'list',
       message: 'Select model:',
-      choices: ['belongsTo', 'hasOne', 'hasMany']
+      choices: [
+        associationType.belongsTo,
+        associationType.hasOne,
+        associationType.hasMany,
+        associationType.belongsToMany
+      ]
     },
     {
       name: 'allowNull',
@@ -54,7 +66,7 @@ async function promptAssociateTo (modelName): Promise<any> {
 }
 
 /**
- * Add relation between model and target passaed in `options`.
+ * Add relation between model and target passed in `options`.
  * After configure with relation and attributes, its write all changes in model file
  * @param {associationOptions} options
  */
@@ -66,7 +78,17 @@ function addModelAssociation (options: associationOptions): void {
 }
 
 function addForeignKey (fileContent: string, associationOptions: associationOptions): string {
-  return fileContent
+  const isBelongsTo = associationType.belongsTo === associationOptions.type
+  const keyName = isBelongsTo ? associationOptions.target + 'Id' : ''
+  if (!keyName) {
+    return fileContent
+  }
+
+  const regex = new RegExp(`(?<=(// foreignkeys))(.|\\s)*?(?=(  public static associations))`)
+  const [oldContent] = fileContent.match(regex) || ['']
+  const newContent = `${oldContent}${INDENT}public ${keyName}: string\n`
+
+  return fileContent.replace(regex, newContent)
 }
 
 function addModelRelation (fileContent: string, associationOptions: associationOptions): string {
