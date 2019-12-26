@@ -1,9 +1,8 @@
-import { makeBatchHasMany, makeBatchHasOne, makeBatch } from './BatchFactory'
-import { IDataLoaderParam } from 'interface/dataloader/DataLoader.interface'
-import { Model, HasOne, HasMany } from 'sequelize/types'
-import DataLoader = require('dataLoader')
+import { BatchParam } from './BatchFactory'
+import DataLoader from 'dataLoader'
 
-const dataLoaderOptions = { cacheKeyFn: (param: IDataLoaderParam) => param.key }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const dataLoaderOptions = { cacheKeyFn: (param: BatchParam) => param.key + param.attributes.reduce((acc, el) => acc + el) }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function DataLoaderFactory () {
@@ -11,38 +10,13 @@ export default function DataLoaderFactory () {
   }
 }
 
-export class DataLoaderSafeNull<k, V> extends DataLoader<k, V> {
-  public async loadSafeNull (params): Promise<V | null> {
+export class DataLoaderSafeNull<V> extends DataLoader<BatchParam, V> {
+  public async loadSafeNull (params: BatchParam): Promise<V | null> {
     const key = params.key
     if (key === null || key === undefined) {
       return null
     }
+
     return super.load(params)
   }
-}
-
-export function makeDataLoaderHasOne (
-  association: HasOne
-): DataLoaderSafeNull<IDataLoaderParam, any> {
-  const batchGenerated = makeBatchHasOne(association)
-  const batchFn = async (params: IDataLoaderParam[]): Promise<any> => batchGenerated(params)
-  return new DataLoaderSafeNull(batchFn, dataLoaderOptions)
-}
-
-export function makeDataLoaderHasMany<T extends Model> (
-  association: HasMany
-): DataLoaderSafeNull<IDataLoaderParam, T[][]> {
-  const batchGeneratedMany = makeBatchHasMany(association)
-  const batchFn = async (params: IDataLoaderParam[]): Promise<T[][][]> => batchGeneratedMany(params)
-
-  return new DataLoaderSafeNull<IDataLoaderParam, T[][]>(batchFn, dataLoaderOptions)
-}
-
-export function makeDataLoader<T extends Model> (
-  model: new () => T
-): DataLoaderSafeNull<IDataLoaderParam, T> {
-  const batchGenerated = makeBatch<T>(model)
-  const batchFn = async (params: IDataLoaderParam[]): Promise<T[]> => batchGenerated(params)
-
-  return new DataLoaderSafeNull<IDataLoaderParam, T>(batchFn, dataLoaderOptions)
 }
