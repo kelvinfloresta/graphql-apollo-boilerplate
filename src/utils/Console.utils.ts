@@ -1,9 +1,9 @@
 import chalk from 'chalk'
 import { isProduction } from 'apollo-utilities'
-import figlet = require('figlet')
-import clear = require('clear')
+import figlet from 'figlet'
+import clear from 'clear'
 
-export function displayStart (text): void {
+export function displayStart (text: string | number): void {
   figlet('Application Name', {
     font: 'Fire Font-k'
   }, (err: Error, data: any) => {
