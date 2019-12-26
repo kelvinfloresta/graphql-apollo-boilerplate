@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize'
-import { isProduction } from '../utils'
+import { isProduction } from '../utils/Environment'
 import environment from './environment'
 
 const {
