@@ -1,43 +1,45 @@
-import { Op, Model, HasOne, HasMany, BelongsTo } from 'Sequelize'
-import { IDataLoaderParam } from 'interface/dataloader/DataLoader.interface'
-import { generateBatch } from 'interface/dataloader/Batch.interface'
-export interface bachParams {
-  ids: string[]
+import { Op, Model, HasOne, HasMany, BelongsTo, ModelCtor } from 'Sequelize'
+export interface BatchParam {
+  key: string
   attributes: string[]
 }
 
-export function makeBatch<T> (model): generateBatch<T[]> {
-  return async (params: IDataLoaderParam[]) => {
+export type BatchFn<T> = (params: BatchParam[]) => Promise<T>
+
+export function makeBatch<T extends Model> (model: ModelCtor<T>): BatchFn<T[]> {
+  return async (params: BatchParam[]) => {
     const ids = params.map(param => param.key)
     const attributes = params[0].attributes
 
-    return model.findAll({
+    return model.findAll<T>({
       where: { id: { [Op.in]: ids } },
       attributes
     })
   }
 }
 
-export function makeBatchHasOne<T extends Model, Y extends Model> (
-  association: HasOne<T, Y> | BelongsTo<T, Y>
-): (params: IDataLoaderParam[]) => Promise<Model[]> {
-  return async (params: IDataLoaderParam[]): Promise<any> => {
+export function makeBatchBelongTo<T extends Model, Y extends Model> (
+  association: BelongsTo<T, Y>
+): BatchFn<T[]> {
+  return async function (params: BatchParam[]) {
     const ids = params.map(el => el.key)
     const attributes = params[0].attributes
-    const isBelongsTo = association.associationType.startsWith('Belongs')
+    const results = await association.source.findAll<T>({
+      where: { id: { [Op.in]: ids } },
+      attributes
+    })
+    return results
+  }
+}
 
-    if (isBelongsTo) {
-      const belongsTo = association as BelongsTo<T, Y>
-      const results = await belongsTo.source.findAll({
-        where: { id: { [Op.in]: ids } },
-        attributes
-      })
-      return results
-    }
-
+export function makeBatchHasOne<T extends Model, Y extends Model> (
+  association: HasOne<Y, T>
+): BatchFn<T[]> {
+  return async function (params: BatchParam[]) {
+    const ids = params.map(el => el.key)
+    const attributes = params[0].attributes
     const keyName = association.source.name + 'Id'
-    const hasOne = association as HasOne<T, Y>
-    const results = await hasOne.target.findAll({
+    const results = await association.target.findAll<T>({
       where: { [keyName]: { [Op.in]: ids } },
       attributes
     })
@@ -46,27 +48,42 @@ export function makeBatchHasOne<T extends Model, Y extends Model> (
   }
 }
 
-export function makeBatchHasMany<T extends Model = any, Y extends Model = any> (
-  association: HasMany<T, Y>
-): generateBatch<any[][][]> {
-  return async (params: IDataLoaderParam[]): Promise<any[][][]> => {
+export function makeBatchManyBelongsTo<T extends Model, Y extends Model> (
+  association: BelongsTo<T, Y>
+): BatchFn<Y[][][]> {
+  return async (params: BatchParam[]): Promise<Y[][][]> => {
     const ids = params.map(param => param.key)
     const attributes = params[0].attributes
 
-    const isBelongsTo = association.associationType.startsWith('Belongs')
-
-    const parent = isBelongsTo ? association.target : association.source
-    const child = isBelongsTo ? association.source : association.target
-
-    const results = await parent.findAll<any>({
+    const results = await association.target.findAll<Y>({
       attributes: ['id'],
       where: { id: { [Op.in]: ids } },
-      include: [{ model: child, attributes }]
+      include: [{ model: association.source, attributes }]
     })
 
-    const relationName = isBelongsTo ? child.name + 's' : association['associationAccessor'] as string
-    results.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
-    const mapped = results.map(entry => [entry.get(relationName) as any[]])
+    const relationName = association.source.name + 's'
+    results.sort((a, b) => ids.indexOf(a['id']) - ids.indexOf(b['id']))
+    const mapped = results.map(entry => [entry.get(relationName) as Y[]])
+    return mapped
+  }
+}
+
+export function makeBatchHasMany<T extends Model, Y extends Model> (
+  association: HasMany<T, Y>
+): BatchFn<T[][][]> {
+  return async (params: BatchParam[]): Promise<T[][][]> => {
+    const ids = params.map(param => param.key)
+    const attributes = params[0].attributes
+
+    const results = await association.source.findAll<T>({
+      attributes: ['id'],
+      where: { id: { [Op.in]: ids } },
+      include: [{ model: association.target, attributes }]
+    })
+
+    const relationName = association['associationAccessor']
+    results.sort((a, b) => ids.indexOf(a['id']) - ids.indexOf(b['id']))
+    const mapped = results.map(entry => [entry.get(relationName) as T[]])
     return mapped
   }
 }
