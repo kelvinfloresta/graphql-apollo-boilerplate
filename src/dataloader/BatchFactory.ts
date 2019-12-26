@@ -1,4 +1,4 @@
-import { Op, Model, HasOne, HasMany, BelongsTo, ModelCtor } from 'Sequelize'
+import { Op, Model, HasOne, HasMany, BelongsTo, ModelCtor, BelongsToMany } from 'Sequelize'
 export interface BatchParam {
   key: string
   attributes: string[]
@@ -84,6 +84,30 @@ export function makeBatchHasMany<T extends Model, Y extends Model> (
     const relationName = association['associationAccessor']
     results.sort((a, b) => ids.indexOf(a['id']) - ids.indexOf(b['id']))
     const mapped = results.map(entry => [entry.get(relationName) as T[]])
+    return mapped
+  }
+}
+
+export function makeBatchBelongsToMany<T extends Model, Y extends Model> (
+  association: BelongsToMany<T, Y>
+): BatchFn<Y[][] > {
+  return async (params: BatchParam[]): Promise<Y[][]> => {
+    const ids = params.map(param => param.key)
+    const attributes = params[0].attributes
+    const results = await association.source.findAll<T>({
+      attributes: ['id'],
+      where: { id: { [Op.in]: ids } },
+      include: [{ model: association.target, attributes }]
+    })
+
+    const relationName = association['associationAccessor']
+    const mapped = ids.map(id => {
+      const resultFound = results.find(result => result.get('id') === id)
+      if (resultFound === null || resultFound === undefined) {
+        return []
+      }
+      return resultFound.get(relationName) as Y[]
+    })
     return mapped
   }
 }
