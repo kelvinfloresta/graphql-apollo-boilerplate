@@ -1,9 +1,8 @@
-import * as Sequelize from 'sequelize'
-import { Role } from 'interface/models/UserModel.interface'
 import db from '../config/database'
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs'
-
-const RoleS: Role[] = ['ADMIN', 'USER']
+import Sequelize = require('sequelize')
+export type Role = 'ADMIN' | 'USER'
+const Roles: Role[] = ['ADMIN', 'USER']
 
 class User extends Sequelize.Model {
   public id!: string
@@ -26,7 +25,7 @@ User.init({
     defaultValue: Sequelize.UUIDV1
   },
   role: {
-    values: RoleS,
+    values: Roles,
     type: Sequelize.ENUM,
     allowNull: false,
     defaultValue: 'USER'

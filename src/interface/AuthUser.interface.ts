@@ -1,4 +1,4 @@
-import { Role } from './models/UserModel.interface'
+import { Role } from 'model/User.model'
 
 export default interface AuthUser {
   id: string
