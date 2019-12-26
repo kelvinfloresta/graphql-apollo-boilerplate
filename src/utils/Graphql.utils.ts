@@ -1,26 +1,27 @@
-import { GraphQLResolveInfo } from 'graphql'
+import { GraphQLResolveInfo, FieldNode } from 'graphql'
 import { get } from 'lodash'
 import { Model } from 'sequelize/types'
 import UserService from '../service/User.service'
 import { GraphqlContext } from 'interface/graphql/GraphqlContext.interface'
+import DataLoaderFactory from '../dataloader/DataLoaderFactory'
 
 export async function getContext ({ req }): Promise<GraphqlContext> {
   const token = req.headers.authorization || ''
   const authUser = await UserService.findByToken(token)
-  return { authUser }
+  const dataLoaders = DataLoaderFactory()
+  return { authUser, dataLoaders }
 }
 
 export function getAttributes (info: GraphQLResolveInfo, model: typeof Model): string[] {
   const fields: string[] = []
 
-  const node = get(info, 'fieldNodes[0].selectionSet.selections', [])
-  node.forEach((el: any) => {
-    const isNode = el['selectionSet'] !== undefined
-    const fieldName = el['name']['value'] as string
+  const node: FieldNode[] = get(info, 'fieldNodes[0].selectionSet.selections', [])
+  node.forEach(el => {
+    const isNode = el.selectionSet !== undefined
+    const fieldName = el.name.value
 
     if (!isNode) {
-      fields.push(fieldName)
-      return
+      return fields.push(fieldName)
     }
 
     const possibleForeignKey = fieldName + 'Id'
@@ -28,10 +29,10 @@ export function getAttributes (info: GraphQLResolveInfo, model: typeof Model): s
     const modelHaveKey = relation !== undefined && relation !== null
 
     if (modelHaveKey) {
-      fields.push(possibleForeignKey)
+      return fields.push(possibleForeignKey)
     }
 
-    if (!modelHaveKey && fieldName.endsWith('s')) {
+    if (fieldName.endsWith('s')) {
       const fieldNameSingular = fieldName.slice(0, -1)
       const possibleRelation = model.associations[fieldNameSingular]
       const modelHaveKey = possibleRelation !== undefined && possibleRelation !== null
