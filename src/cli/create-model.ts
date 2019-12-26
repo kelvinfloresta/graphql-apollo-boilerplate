@@ -29,11 +29,11 @@ export default async function promptCreateModel (): Promise<void> {
   const attributes = buildAttributes(answerAttributes)
   const sequelizeAttributes = buildSequelizeAttributes(answerAttributes)
 
-  const schemaConfirm = await promptConfirm('Want define input/type fields?')
+  const schemaConfirm = await promptConfirm('Want generate Graphql schema?')
   if (schemaConfirm) {
     var schemaAnswer = await promptSchema(answerAttributes)
   }
-  const confirmResolver = await promptConfirm('Want generate resolver file?')
+  const confirmResolver = await promptConfirm('Want generate Graphql resolver?')
 
   log(modelName, answerAttributes, schemaAnswer.typeFields, schemaAnswer.inputFields)
 
@@ -65,16 +65,3 @@ function log (modelName, answerAttributes, typeFields, inputFields): void {
   console.log('Type Fields:', typeFields.map(e => e.name as string))
   console.log('Input Fields:', inputFields.map(e => e.name as string))
 }
-
-// function updateImodels (modelName): void {
-//   const regex = /(?<=IModels extends Models \{)(.|\s)*?(?=\})/
-//   const filePath = path.join(INTERFACE_DIR, 'IModels.ts')
-//   const oldContent = fs.readFileSync(filePath, 'utf8')
-//   const newProp = `readonly ${modelName}: ${modelName}Model`
-//   const [oldProps] = oldContent.match(regex)
-//   let newContent = oldContent.replace(regex, `${oldProps}  ${newProp}\n`)
-
-//   const newImport = `import { ${modelName}Model } from 'src/model/${modelName}.model'\n`
-//   newContent = newImport + newContent
-//   fs.writeFileSync(filePath, newContent, 'utf8')
-// }
