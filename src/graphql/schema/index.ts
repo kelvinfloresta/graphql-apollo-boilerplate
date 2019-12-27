@@ -1,6 +1,6 @@
 import * as fs from 'fs'
-import Environment from '../../config/environment'
-import { importSafeEslint } from '../../utils/Import.utils'
+import Environment from 'config/environment'
+import { importSafeEslint } from 'utils/Import.utils'
 import { gql } from 'apollo-server'
 
 let schemas = gql`
