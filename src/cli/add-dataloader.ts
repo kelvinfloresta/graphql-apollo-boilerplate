@@ -19,11 +19,9 @@ function loadDataLoaderFactory (): string {
 }
 
 function addLoaderFactory (fileContent: string, associateOptions: associationOptions): string {
-  const { type, target, modelName } = associateOptions
-  const isBelongsTo = type === associationType.belongsTo
-  const modelToBeImport = isBelongsTo ? target : modelName
+  const { modelName } = associateOptions
   const withDataLoader = buildLoader(fileContent, associateOptions)
-  const withImport = importModelToContent(modelToBeImport, withDataLoader)
+  const withImport = importModelToContent(modelName, withDataLoader)
   return withImport
 }
 
@@ -39,13 +37,13 @@ function buildLoaderObject ({ type, target, modelName }: associationOptions): st
   const modelNameLowerCase = modelName.toLocaleLowerCase()
   switch (type) {
     case associationType.belongsTo:
-      return `${modelNameLowerCase}${target}: new DataLoader(makeBatchBelongsTo(${modelName}.associations.${target}, dataLoaderOptions))`
+      return `${modelNameLowerCase}${target}: new DataLoader(makeBatchBelongsTo(${modelName}.associations.${target}), dataLoaderOptions)`
 
     case associationType.hasOne:
-      return `${modelNameLowerCase}${target}: new DataLoader(makeBatchHasOne(${modelName}.associations.${target}, dataLoaderOptions))`
+      return `${modelNameLowerCase}${target}: new DataLoader(makeBatchHasOne(${modelName}.associations.${target}), dataLoaderOptions)`
 
     case associationType.hasMany:
-      return `${modelNameLowerCase}${target}s: new DataLoader(makeBatchHasMany(${modelName}.associations.${target}s, dataLoaderOptions)`
+      return `${modelNameLowerCase}${target}s: new DataLoader(makeBatchHasMany(${modelName}.associations.${target}s), dataLoaderOptions)`
   }
 
   throw new Error('Invalid parameter')
