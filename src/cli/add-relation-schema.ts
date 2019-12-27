@@ -21,33 +21,33 @@ function replaceSchemaInputAssociation (content, associationOptions: association
   }
   const regex = new RegExp(`(?<=input ${modelName}Input \\{)(.|\\s)*?(?=\\})`)
   const [oldSchemaAssociation] = content.match(regex)
-  const targetType = getTargetSchemaType(associationOptions, true)
+  const targetType = getAssociationType(associationOptions, true)
   const newAssociationContent = `${oldSchemaAssociation}${INDENT}${target}: ${targetType}\n${INDENT}`
   return content.replace(regex, newAssociationContent)
 }
 
-function replaceSchemaTypeAssociation (content, associationOptions: associationOptions): string {
-  const { target, modelName, schema } = associationOptions
+function replaceSchemaTypeAssociation (content: string, associationOptions: associationOptions): string {
+  const { modelName, schema } = associationOptions
   if (!schema.type) {
     return content
   }
   const regex = new RegExp(`(?<=type ${modelName} \\{)(.|\\s)*?(?=createdAt)`)
-  const [oldSchemaAssociation] = content.match(regex)
-  const targetType = getTargetSchemaType(associationOptions)
-  const newAssociationContent = `${oldSchemaAssociation}${target}: ${targetType}\n${INDENT}${INDENT}`
+  const [oldSchemaAssociation] = content.match(regex) || ['']
+  const schemaAssociation = getAssociationType(associationOptions)
+  const newAssociationContent = `${oldSchemaAssociation}${schemaAssociation}\n${INDENT}${INDENT}`
   return content.replace(regex, newAssociationContent)
 }
 
-function getTargetSchemaType ({ type, target, allowNull }: associationOptions, isInput = false): string {
+function getAssociationType ({ type, target, allowNull }: associationOptions, isInput = false): string {
   const isMany = type.toLowerCase().includes('many')
-  const targetName = isInput ? 'ID' : target
+  const schemaType = isInput ? 'ID' : target
   if (isMany) {
-    return `[${targetName}!]!`
+    return `${target}s: [${schemaType}!]!`
   }
 
   if (allowNull) {
-    return targetName
+    return `${target}Id: ${schemaType}`
   }
 
-  return targetName + '!'
+  return `${target}Id: ${schemaType}!`
 }

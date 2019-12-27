@@ -1,5 +1,5 @@
 import { loadResolver, importModelToContent } from './file.utils'
-import { associationOptions as options } from './add-relation'
+import { associationOptions as options, associationType } from './add-relation'
 import { RESOLVER_DIR, INDENT } from 'cli'
 import path = require('path')
 import fs = require('fs')
@@ -26,7 +26,7 @@ function replaceResolverAssociation (oldContent: string, associationOptions: opt
   const oldResolverContent = match[0]
   const isEmpty = match[2] === '}'
   const comma = isEmpty ? '' : ','
-  const isMany = type.toLowerCase().includes('many')
+  const isMany = type === associationType.hasMany
   const associationResolver = isMany ? buildResolerAssociationList(associationOptions) : buildResolerAssociation(associationOptions)
   const newResolverContent = `\n${INDENT}${INDENT}${associationResolver}${comma}${oldResolverContent}`
   const newContent = oldContent.replace(regex, newResolverContent)
@@ -37,25 +37,38 @@ function replaceResolverAssociation (oldContent: string, associationOptions: opt
 function buildResolerAssociationList (associationOptions: options): string {
   const { modelName, target } = associationOptions
   const targetLowerCase = target.toLowerCase()
+  const modelNameLowerCase = modelName.toLowerCase()
+  const loaderName = `${modelNameLowerCase}${target}s`
 
-  return `${target}s: async (${targetLowerCase}: ${target}, args, { dataLoaders }: GraphqlContext, info: GraphQLResolveInfo) => {
+  return `${target}s: async (${targetLowerCase}: ${target}, _args, { dataLoaders }: GraphqlContext, info: GraphQLResolveInfo) => {
       const key = ${targetLowerCase}.id
       const attributes = getAttributes(info, ${target})
 
-      const [result = []] = await ${modelName}Service.loadSafeNull({ key, attributes })
-      return result
+      return dataLoaders.${loaderName}.load({ key, attributes })
     }`
 }
 
 function buildResolerAssociation (associationOptions: options): string {
   const { modelName, target } = associationOptions
   const modelNameLowerCase = modelName.toLowerCase()
-  const loaderName = `${modelNameLowerCase}${target}Loader()`
-  const parentKey = associationOptions.type.startsWith('has') ? 'id' : `${target}Id`
+  const loaderName = `${modelNameLowerCase}${target}`
+  const parentKey = getParentKey(associationOptions)
 
-  return `${target}: async (${modelNameLowerCase}: ${modelName}, args, { dataLoaders }: GraphqlContext, info: GraphQLResolveInfo) => {
+  return `${target}: async (${modelNameLowerCase}: ${modelName}, _args, { dataLoaders }: GraphqlContext, info: GraphQLResolveInfo) => {
       const key = ${modelNameLowerCase}.${parentKey}
       const attributes = getAttributes(info, ${target})
-      return dataLoaders.${loaderName}.loadSafeNull({ key, attributes })
+      return dataLoaders.${loaderName}.load({ key, attributes })
     }`
+}
+
+function getParentKey ({ type, target }: options): string {
+  switch (type) {
+    case associationType.hasOne:
+      return 'id'
+
+    case associationType.belongsTo:
+      return `${target}Id`
+  }
+
+  throw new Error('Invalid parameter')
 }

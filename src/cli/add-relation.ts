@@ -2,9 +2,12 @@ import { INDENT } from './index'
 import { capitalize } from 'utils/String.utils'
 import { loadModel, replaceModelFile, loadAllModelsName, importModelToContent } from './file.utils'
 import { addSchemaAssociation } from './add-relation-schema'
+import promptConfirm from './confirm'
+import { addDataloader } from './add-dataloader'
+import { addAssociationResolver } from './add-relation-resolver'
 import inquirer = require('inquirer')
 
-const associationType = {
+export const associationType = {
   belongsTo: 'belongsTo',
   hasOne: 'hasOne',
   hasMany: 'hasMany',
@@ -26,9 +29,14 @@ export default async function promptAddAssociation (): Promise<void> {
   const associationOptions: associationOptions = { modelName, target, type, allowNull, schema }
   addModelAssociation(associationOptions)
   addSchemaAssociation(associationOptions)
+  const confirmResolver = await promptConfirm('Want update Graphql resolver?')
+  if (confirmResolver) {
+    addAssociationResolver(associationOptions)
+    addDataloader(associationOptions)
+  }
 }
 
-async function promptAssociateTo (modelName): Promise<any> {
+async function promptAssociateTo (modelName: string): Promise<any> {
   const QUESTIONS = [
     {
       name: 'target',
@@ -39,7 +47,7 @@ async function promptAssociateTo (modelName): Promise<any> {
     {
       name: 'type',
       type: 'list',
-      message: 'Select model:',
+      message: 'Select *target* model:',
       choices: [
         associationType.belongsTo,
         associationType.hasOne,
@@ -55,10 +63,11 @@ async function promptAssociateTo (modelName): Promise<any> {
     {
       name: 'schema',
       type: 'checkbox',
-      message: 'Add type/input to schema?',
+      message: 'Want update Graphql schema?',
       choices: [{ name: 'Input', value: true }, { name: 'type', value: true }]
     }
   ]
+
   const answer = await inquirer.prompt(QUESTIONS)
   const [input = false, type = false] = answer['schema']
   answer['schema'] = { input, type }
@@ -102,12 +111,11 @@ function buildModelRelation (fileContent: string, associationOptions: associatio
   const regex = new RegExp(`(?<=(// Relations))(.|\\s)*?(?=(export default))`)
   const [oldContent] = fileContent.match(regex) || ['']
   const { target, modelName, type } = associationOptions
-  const isSource = associationOptions.type.startsWith('has')
-  const keyName = isSource ? 'sourceKey' : 'targetKey'
   const newContent = `${oldContent}${modelName}.${type}(${target}, {
-${INDENT}${keyName}: 'id'
+  foreignKey: {
+    allowNull: ${associationOptions.allowNull}
+  }
 })
-
 `
   return fileContent.replace(regex, newContent)
 }
