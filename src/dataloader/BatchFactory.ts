@@ -11,7 +11,7 @@ export type BatchFn<T> = (params: BatchParam[]) => Promise<T>
  *
  * @param model
  */
-export function makeBatch<T extends Model> (model: ModelCtor<T>): BatchFn<T[]> {
+export function makeBatch<T extends Model> (model: ModelCtor<T>): BatchFn<Array<T| null>> {
   return async (params: BatchParam[]) => {
     const ids = params.map(param => param.key)
     const attributes = params[0].attributes
@@ -21,8 +21,15 @@ export function makeBatch<T extends Model> (model: ModelCtor<T>): BatchFn<T[]> {
       attributes
     })
 
-    const ordered = results.sort((a, b) => ids.indexOf(a['id']) - ids.indexOf(b['id']))
-    return ordered
+    const mapped = ids.map(id => {
+      const resultFound = results.find(result => result.get('id') === id)
+      if (resultFound === null || resultFound === undefined) {
+        return null
+      }
+      return resultFound
+    })
+
+    return mapped
   }
 }
 
@@ -34,13 +41,13 @@ export function makeBatch<T extends Model> (model: ModelCtor<T>): BatchFn<T[]> {
  */
 export function makeBatchBelongsTo<T extends Model, Y extends Model> (
   association: BelongsTo<T, Y>
-): BatchFn<Y[]> {
+): BatchFn<Array<Y|null>> {
   return makeBatch(association.target)
 }
 
 export function makeBatchHasOne<T extends Model, Y extends Model> (
   association: HasOne<Y, T>
-): BatchFn<T[]> {
+): BatchFn<Array<T| null>> {
   return async function (params: BatchParam[]) {
     const ids = params.map(el => el.key)
     const attributes = params[0].attributes
@@ -50,8 +57,15 @@ export function makeBatchHasOne<T extends Model, Y extends Model> (
       attributes
     })
 
-    const ordered = results.sort((a, b) => ids.indexOf(a['id']) - ids.indexOf(b['id']))
-    return ordered
+    const mapped = ids.map(id => {
+      const resultFound = results.find(result => result.get('id') === id)
+      if (resultFound === null || resultFound === undefined) {
+        return null
+      }
+      return resultFound
+    })
+
+    return mapped
   }
 }
 

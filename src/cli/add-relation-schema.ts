@@ -46,8 +46,8 @@ function getAssociationType ({ type, target, allowNull }: associationOptions, is
   }
 
   if (allowNull) {
-    return `${target}Id: ${schemaType}`
+    return `${target}: ${schemaType}`
   }
 
-  return `${target}Id: ${schemaType}!`
+  return `${target}: ${schemaType}!`
 }

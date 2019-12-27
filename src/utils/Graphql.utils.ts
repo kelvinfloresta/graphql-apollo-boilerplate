@@ -25,10 +25,8 @@ export function getAttributes (info: GraphQLResolveInfo, model: typeof Model): s
     }
 
     const possibleForeignKey = fieldName + 'Id'
-    const relation = model.associations[possibleForeignKey]
-    const modelHaveKey = relation !== undefined && relation !== null
-
-    if (modelHaveKey) {
+    const isForeignKey = model.rawAttributes.hasOwnProperty(possibleForeignKey)
+    if (isForeignKey) {
       return fields.push(possibleForeignKey)
     }
 
