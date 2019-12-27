@@ -22,7 +22,7 @@ function replaceSchemaInputAssociation (content, associationOptions: association
   const regex = new RegExp(`(?<=input ${modelName}Input \\{)(.|\\s)*?(?=\\})`)
   const [oldSchemaAssociation] = content.match(regex)
   const schemaAssociation = getAssociationType(associationOptions, true)
-  const newAssociationContent = `${oldSchemaAssociation}${schemaAssociation}\n${INDENT}${INDENT}`
+  const newAssociationContent = `${oldSchemaAssociation}${INDENT}${schemaAssociation}\n${INDENT}`
   return content.replace(regex, newAssociationContent)
 }
 
