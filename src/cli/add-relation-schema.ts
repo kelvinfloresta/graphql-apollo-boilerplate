@@ -14,15 +14,15 @@ export function addSchemaAssociation (associationOptions: associationOptions): v
 }
 
 function replaceSchemaInputAssociation (content, associationOptions: associationOptions): string {
-  const { target, modelName, schema } = associationOptions
+  const { modelName, schema } = associationOptions
   const hasInput = content.indexOf('Input {') !== -1
   if (!schema.input || !hasInput) {
     return content
   }
   const regex = new RegExp(`(?<=input ${modelName}Input \\{)(.|\\s)*?(?=\\})`)
   const [oldSchemaAssociation] = content.match(regex)
-  const targetType = getAssociationType(associationOptions, true)
-  const newAssociationContent = `${oldSchemaAssociation}${INDENT}${target}: ${targetType}\n${INDENT}`
+  const schemaAssociation = getAssociationType(associationOptions, true)
+  const newAssociationContent = `${oldSchemaAssociation}${schemaAssociation}\n${INDENT}${INDENT}`
   return content.replace(regex, newAssociationContent)
 }
 
