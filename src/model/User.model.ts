@@ -9,6 +9,9 @@ class User extends Sequelize.Model {
   public password!: string
   public role!: Role
 
+  public static associations: {
+  }
+
   public passwordMatch (encodedPassword: string, password: string): boolean {
     return compareSync(password, encodedPassword)
   }
