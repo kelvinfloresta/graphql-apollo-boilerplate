@@ -3,8 +3,8 @@ import promptAddAttribute, { buildAttributes, buildSequelizeAttributes } from '.
 import promptSchema, { createSchema, buildSchemaFields } from './add-schema'
 import { MODEL_DIR } from '.'
 import { createResolver } from './add-resolver'
-import { capitalize } from 'lodash'
 import { loadTemplate } from './file.utils'
+import { capitalize } from 'utils/String.utils'
 import inquirer = require('inquirer')
 import fs = require('fs')
 import path = require('path')
